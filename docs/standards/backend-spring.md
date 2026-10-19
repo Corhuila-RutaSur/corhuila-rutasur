@@ -19,6 +19,7 @@ Orden de consulta para una implementación:
 - Los repositorios contienen consultas de persistencia; no contienen decisiones de negocio.
 - Las entidades JPA no deben salir de la capa `service`.
 - Los DTOs de entrada se validan con Bean Validation y las respuestas HTTP usan DTOs de salida explícitos.
+- Todas las solicitudes y respuestas HTTP se implementan con `record`; no se usan entidades JPA ni clases DTO mutables como contratos de API.
 - Cada controlador implementa una interfaz ubicada en `api/` que contiene el contrato HTTP y las anotaciones OpenAPI. El controlador implementa el comportamiento; la interfaz describe el contrato público.
 - Cada método expuesto por la interfaz API declara resumen, descripción, respuestas HTTP y modelos relevantes de OpenAPI.
 

@@ -18,5 +18,6 @@ Las especificaciones son la fuente de verdad funcional de RutaSur: describen qu�
 | [010-estados-del-dominio](010-estados-del-dominio.md) | Estados y transiciones permitidas. |
 | [011-autenticacion-y-sesiones](011-autenticacion-y-sesiones.md) | Acceso público, JWT, sesiones, refresh tokens y revocación. |
 | [012-gobierno-documentacion](012-gobierno-documentacion.md) | Actualización obligatoria de README, specs, modelo, API y Wiki. |
+| [013-gestion-de-usuarios](013-gestion-de-usuarios.md) | Registro, perfil, unicidad de datos e inactivación lógica de usuarios. |
 
 Para crear una nueva funcionalidad, utiliza `plantilla-spec.md` y el siguiente número consecutivo.

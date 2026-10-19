@@ -13,7 +13,7 @@ El cliente construye su propio paquete al reservar. La regla que evita combinaci
 | Tabla | Para que se usa |
 | --- | --- |
 | `tipo_usuario` | Catalogo de roles: `CLIENTE`, `ADMINISTRADOR`, `GUIA` y `CONDUCTOR`. |
-| `usuario` | Datos de identidad, contacto y acceso de cada persona registrada. Puede comprar experiencias o trabajar en la operacion. |
+| `usuario` | Datos de identidad, contacto y acceso de cada persona registrada. El documento, correo y telefono movil colombiano son unicos; `activo` implementa la inactivacion logica. |
 | `usuario_tipo` | Tabla puente que asigna uno o varios roles a un usuario. Una persona puede, por ejemplo, ser cliente y guia. |
 | `guia` | Perfil operativo de un usuario que acompana una experiencia. Almacena su registro y observaciones. |
 | `conductor` | Perfil operativo de un usuario que conduce. Conserva licencia, categoria y vencimiento. |
@@ -102,6 +102,7 @@ La aplicacion tambien debera validar disponibilidad, transiciones de estado, reg
 | `V1` | Estructura inicial: tipos PostgreSQL, tablas, relaciones, restricciones e integridad transversal. |
 | `V2` | Datos semilla: roles de usuario y clasificaciones iniciales de experiencias. |
 | `V3` | Sesiones, refresh tokens de un solo uso, revocacion de access tokens y auditoria de autenticacion. |
+| `V4` | Restriccion de telefono obligatorio, unico y movil colombiano; indice de correo normalizado para el flujo de usuarios. |
 
 La creacion de la base PostgreSQL `rutasur` no es una migracion Flyway. Debe realizarse una vez por el administrador; luego Flyway aplica las versiones dentro de esa base.
 

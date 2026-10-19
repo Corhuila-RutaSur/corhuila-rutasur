@@ -67,6 +67,7 @@ docs/
 | [Especificaciones funcionales](docs/specs/README.md) | Define el comportamiento antes de implementar. |
 | [Reglas de negocio](docs/specs/009-reglas-de-negocio.md) | Reglas transversales del dominio. |
 | [Autenticación y sesiones](docs/specs/011-autenticacion-y-sesiones.md) | Acceso público, JWT, refresh tokens y revocación. |
+| [Gestión de usuarios](docs/specs/013-gestion-de-usuarios.md) | Registro, perfil, validación de datos e inactivación lógica. |
 | [Modelo de datos](docs/database/modelo-de-datos-v1.md) | Propósito de cada tabla y regla de persistencia. |
 | [Modelo entidad–relación](docs/architecture/modelo-entidad-relacion-v1.md) | Relaciones principales entre entidades. |
 | [Migraciones](docs/database/README.md) | Creación de base, versionado y orden de Flyway. |

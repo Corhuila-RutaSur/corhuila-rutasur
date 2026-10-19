@@ -11,12 +11,31 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
 
+    /**
+     * Construye el codificador irreversible de contrasenias para las credenciales locales.
+     *
+     * @return codificador BCrypt con factor de trabajo 12.
+     */
+    @Bean
+    PasswordEncoder codificadorContrasenias() {
+        return new BCryptPasswordEncoder(12);
+    }
+
+    /**
+     * Define una API sin sesion HTTP y separa el registro publico de las operaciones protegidas.
+     *
+     * @param http configurador de seguridad de Spring.
+     * @return cadena de filtros configurada.
+     * @throws Exception si Spring Security no puede construir la cadena.
+     */
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
