@@ -1,3 +1,46 @@
 spring:
   application:
     name: rutasur
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5433/rutasur}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+  jackson:
+    default-property-inclusion: non_null
+    time-zone: America/Bogota
+  mvc:
+    problemdetails:
+      enabled: true
+
+server:
+  port: ${SERVER_PORT:8090}
+  error:
+    include-message: never
+    include-stacktrace: never
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never
+
+app:
+  cors:
+    allowed-origin-patterns: ${CORS_ALLOWED_ORIGINS:http://localhost:4200,http://127.0.0.1:4200}
+    allowed-methods: GET,POST,PUT,PATCH,DELETE,OPTIONS
+    allowed-headers: Authorization,Content-Type,Accept,Origin,X-Requested-With
+    exposed-headers: Location
+    allow-credentials: true
+    max-age: 3600
+
+scalar:
+  enabled: true
+  url: /v3/api-docs
