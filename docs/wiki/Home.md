@@ -26,3 +26,5 @@ Controller → Service → Repository → PostgreSQL
 ```
 
 Consulta [Arquitectura V1](Arquitectura-V1) para conocer las responsabilidades de cada capa y [Guía de desarrollo](Guia-de-Desarrollo) para el flujo de trabajo.
+
+El comportamiento del producto se define en las [Especificaciones V1](Especificaciones-V1), mientras que el modelo persistente se explica en [Modelo de datos V1](Modelo-de-Datos-V1).
