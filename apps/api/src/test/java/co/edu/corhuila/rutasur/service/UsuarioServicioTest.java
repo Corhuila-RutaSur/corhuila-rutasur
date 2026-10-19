@@ -6,14 +6,19 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.mock;
 
 import co.edu.corhuila.rutasur.dto.request.UsuarioRegistroRequest;
 import co.edu.corhuila.rutasur.dto.response.UsuarioResponse;
 import co.edu.corhuila.rutasur.entity.Usuario;
+import co.edu.corhuila.rutasur.entity.TipoUsuario;
 import co.edu.corhuila.rutasur.exception.ExcepcionReglaNegocio;
 import co.edu.corhuila.rutasur.mapper.UsuarioMapper;
 import co.edu.corhuila.rutasur.repository.UsuarioRepositorio;
+import co.edu.corhuila.rutasur.repository.TipoUsuarioRepositorio;
+import co.edu.corhuila.rutasur.repository.UsuarioTipoRepositorio;
 import java.time.OffsetDateTime;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -36,6 +41,12 @@ class UsuarioServicioTest {
     @Mock
     private PasswordEncoder codificadorContrasenias;
 
+    @Mock
+    private TipoUsuarioRepositorio tipoUsuarioRepositorio;
+
+    @Mock
+    private UsuarioTipoRepositorio usuarioTipoRepositorio;
+
     @InjectMocks
     private UsuarioServicio usuarioServicio;
 
@@ -50,6 +61,8 @@ class UsuarioServicioTest {
         when(usuarioMapper.aEntidad(solicitud)).thenReturn(usuario);
         when(codificadorContrasenias.encode(solicitud.contrasenia())).thenReturn("hash-bcrypt");
         when(usuarioRepositorio.save(usuario)).thenReturn(usuario);
+        when(tipoUsuarioRepositorio.findByNombreAndActivoTrue("CLIENTE"))
+                .thenReturn(Optional.of(mock(TipoUsuario.class)));
         when(usuarioMapper.aRespuesta(usuario)).thenReturn(respuesta);
 
         UsuarioResponse resultado = usuarioServicio.registrar(solicitud);

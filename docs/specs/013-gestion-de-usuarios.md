@@ -22,6 +22,7 @@ Permitir el registro y la administración lógica de cuentas de usuario sin expo
 6. La eliminación de una cuenta es lógica: se actualiza `usuario.activo` a `false` y se conserva todo su historial.
 7. Una cuenta inactiva no aparece en consultas ordinarias ni se puede actualizar mediante este flujo.
 8. El registro es público. Las operaciones de consulta, actualización e inactivación requieren autenticación cuando se implemente JWT.
+9. Toda cuenta creada recibe automáticamente el rol `CLIENTE` activo, definido en el catálogo inicial de roles.
 
 ## Contratos API
 

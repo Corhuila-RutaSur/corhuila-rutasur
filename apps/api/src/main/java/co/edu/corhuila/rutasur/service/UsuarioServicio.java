@@ -4,9 +4,13 @@ import co.edu.corhuila.rutasur.dto.request.UsuarioActualizacionRequest;
 import co.edu.corhuila.rutasur.dto.request.UsuarioRegistroRequest;
 import co.edu.corhuila.rutasur.dto.response.UsuarioResponse;
 import co.edu.corhuila.rutasur.entity.Usuario;
+import co.edu.corhuila.rutasur.entity.UsuarioTipo;
+import co.edu.corhuila.rutasur.entity.TipoUsuario;
 import co.edu.corhuila.rutasur.exception.ExcepcionReglaNegocio;
 import co.edu.corhuila.rutasur.mapper.UsuarioMapper;
 import co.edu.corhuila.rutasur.repository.UsuarioRepositorio;
+import co.edu.corhuila.rutasur.repository.TipoUsuarioRepositorio;
+import co.edu.corhuila.rutasur.repository.UsuarioTipoRepositorio;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Locale;
@@ -20,9 +24,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class UsuarioServicio {
 
+    private static final String ROL_CLIENTE = "CLIENTE";
+
     private final UsuarioRepositorio usuarioRepositorio;
     private final UsuarioMapper usuarioMapper;
     private final PasswordEncoder codificadorContrasenias;
+    private final TipoUsuarioRepositorio tipoUsuarioRepositorio;
+    private final UsuarioTipoRepositorio usuarioTipoRepositorio;
 
     /**
      * Construye el servicio con sus dependencias de persistencia, mapeo y seguridad.
@@ -30,14 +38,20 @@ public class UsuarioServicio {
      * @param usuarioRepositorio acceso a cuentas de usuario.
      * @param usuarioMapper conversor de contratos y entidades.
      * @param codificadorContrasenias codificador BCrypt configurado.
+     * @param tipoUsuarioRepositorio acceso al catalogo de roles.
+     * @param usuarioTipoRepositorio persistencia de roles asignados.
      */
     public UsuarioServicio(
             UsuarioRepositorio usuarioRepositorio,
             UsuarioMapper usuarioMapper,
-            PasswordEncoder codificadorContrasenias) {
+            PasswordEncoder codificadorContrasenias,
+            TipoUsuarioRepositorio tipoUsuarioRepositorio,
+            UsuarioTipoRepositorio usuarioTipoRepositorio) {
         this.usuarioRepositorio = usuarioRepositorio;
         this.usuarioMapper = usuarioMapper;
         this.codificadorContrasenias = codificadorContrasenias;
+        this.tipoUsuarioRepositorio = tipoUsuarioRepositorio;
+        this.usuarioTipoRepositorio = usuarioTipoRepositorio;
     }
 
     /**
@@ -54,7 +68,9 @@ public class UsuarioServicio {
         validarUnicidad(usuario, null);
         usuario.setPasswordHash(codificadorContrasenias.encode(solicitud.contrasenia()));
         usuario.setActivo(true);
-        return usuarioMapper.aRespuesta(usuarioRepositorio.save(usuario));
+        Usuario usuarioCreado = usuarioRepositorio.save(usuario);
+        asignarRolCliente(usuarioCreado);
+        return usuarioMapper.aRespuesta(usuarioCreado);
     }
 
     /**
@@ -200,5 +216,17 @@ public class UsuarioServicio {
         usuario.setApellidos(usuario.getApellidos().trim());
         usuario.setCorreo(usuario.getCorreo().trim().toLowerCase(Locale.ROOT));
         usuario.setTelefono(usuario.getTelefono().trim());
+    }
+
+    /**
+     * Asigna el rol CLIENTE definido en los datos semilla a una cuenta nueva.
+     *
+     * @param usuario usuario persistido que recibira el rol por defecto.
+     * @throws ExcepcionReglaNegocio si el catalogo no contiene un rol CLIENTE activo.
+     */
+    private void asignarRolCliente(Usuario usuario) {
+        TipoUsuario rolCliente = tipoUsuarioRepositorio.findByNombreAndActivoTrue(ROL_CLIENTE)
+                .orElseThrow(() -> new ExcepcionReglaNegocio("usuario.rol_cliente.no_encontrado"));
+        usuarioTipoRepositorio.save(new UsuarioTipo(usuario, rolCliente));
     }
 }
