@@ -2,7 +2,7 @@
 
 Este diagrama representa la estructura persistente definida por las migraciones `V1`, `V2` y `V3`. La migración SQL es la fuente ejecutable; el diagrama permite comprender las relaciones principales sin sobrecargarlo con atributos.
 
-Los atributos, tipos, restricciones y descripciones de cada columna se consultan en las migraciones Flyway mediante los comentarios PostgreSQL (`COMMENT ON`) y en el [diccionario de datos](../wiki/Modelo-de-Datos-V1.md).
+Los atributos, tipos, restricciones y descripciones de cada columna se consultan en las migraciones Flyway mediante los comentarios PostgreSQL (`COMMENT ON`) y en el [diccionario de datos](../database/modelo-de-datos-v1.md).
 
 ## Experiencias, reservas y operación
 

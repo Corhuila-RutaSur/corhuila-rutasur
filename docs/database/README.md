@@ -23,3 +23,5 @@ DB_PASSWORD=tu_contrasena
 Las migraciones viven en `apps/api/src/main/resources/db/migration/`. Una migracion que ya fue aplicada en un ambiente compartido no debe editarse: un cambio posterior se incorpora en una nueva version, por ejemplo `V3__add_x.sql`.
 
 Todas las tablas y columnas de las migraciones incluyen comentarios PostgreSQL (`COMMENT ON`). Estos se pueden consultar desde pgAdmin y otras herramientas para entender el propósito de cada elemento sin salir de la base de datos.
+
+Consulta el [diccionario de datos V1](modelo-de-datos-v1.md) para la explicación funcional de cada tabla, sus reglas y las versiones iniciales de migración.

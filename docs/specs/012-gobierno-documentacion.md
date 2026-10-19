@@ -17,7 +17,7 @@ Mantener la documentación como parte del producto: actual, verificable y útil 
 3. Todo endpoint nuevo o cambio de contrato debe reflejarse en OpenAPI y, cuando afecte el uso del sistema, en la especificación funcional.
 4. El `README.md` debe reflejar el propósito, estado, arquitectura resumida, estructura, documentación principal, requisitos y forma vigente de ejecutar el proyecto.
 5. Si un cambio modifica cualquiera de esos elementos del README, se debe actualizar en el mismo pull request.
-6. La Wiki replica información de consulta; los archivos en `docs/` son la fuente versionada de referencia.
+6. La Wiki replica información de consulta; los archivos en `docs/` son la fuente versionada de referencia. No debe existir una segunda copia fuente dentro de este repositorio.
 7. Ninguna documentación debe contener secretos, contraseñas, JWT, refresh tokens ni datos personales reales.
 
 ## Criterios de aceptación

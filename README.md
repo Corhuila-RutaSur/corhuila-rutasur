@@ -45,7 +45,7 @@ Experiencia
                     └── Participantes, pagos, asistencia y ejecución
 ```
 
-Consulta el [modelo entidad–relación](docs/architecture/modelo-entidad-relacion-v1.md) y el [diccionario de datos](docs/wiki/Modelo-de-Datos-V1.md) para el detalle.
+Consulta el [modelo entidad–relación](docs/architecture/modelo-entidad-relacion-v1.md) y el [diccionario de datos](docs/database/modelo-de-datos-v1.md) para el detalle.
 
 ## Estructura del repositorio
 
@@ -58,7 +58,6 @@ docs/
   architecture/        Arquitectura, diagramas y contratos
   database/            Guía de PostgreSQL y migraciones
   adr/                 Decisiones arquitectónicas
-  wiki/                Páginas fuente para la Wiki de GitHub
 ```
 
 ## Documentación principal
@@ -68,7 +67,7 @@ docs/
 | [Especificaciones funcionales](docs/specs/README.md) | Define el comportamiento antes de implementar. |
 | [Reglas de negocio](docs/specs/009-reglas-de-negocio.md) | Reglas transversales del dominio. |
 | [Autenticación y sesiones](docs/specs/011-autenticacion-y-sesiones.md) | Acceso público, JWT, refresh tokens y revocación. |
-| [Modelo de datos](docs/wiki/Modelo-de-Datos-V1.md) | Propósito de cada tabla y regla de persistencia. |
+| [Modelo de datos](docs/database/modelo-de-datos-v1.md) | Propósito de cada tabla y regla de persistencia. |
 | [Modelo entidad–relación](docs/architecture/modelo-entidad-relacion-v1.md) | Relaciones principales entre entidades. |
 | [Migraciones](docs/database/README.md) | Creación de base, versionado y orden de Flyway. |
 | [Documentación de API](docs/architecture/documentacion-api.md) | Swagger UI, Scalar y OpenAPI JSON. |
@@ -78,7 +77,7 @@ docs/
 | [Componentes reutilizables del frontend](docs/architecture/componentes-reutilizables-frontend.md) | Catalogo, validacion y reglas de uso de la interfaz. |
 | [Decisiones de arquitectura](docs/adr/README.md) | ADRs vigentes del proyecto. |
 
-La Wiki publicada replica las páginas de consulta general. La documentación fuente y versionada se mantiene en este repositorio.
+La documentación fuente y versionada se mantiene en `docs/`. La [Wiki publicada](https://github.com/Corhuila-RutaSur/corhuila-rutasur/wiki) replica las páginas de consulta general y debe sincronizarse cuando cambie información funcional o técnica.
 
 ## Inicio rápido local
 

@@ -1,0 +1,9 @@
+# Configuración local de IDE
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db

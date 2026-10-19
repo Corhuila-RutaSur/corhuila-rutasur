@@ -58,16 +58,16 @@ El cliente construye su propio paquete al reservar. La regla que evita combinaci
 | `ejecucion_experiencia` | Registro de lo ocurrido realmente en una salida: guia asignado, horas reales, estado y novedades. El guia acompana el flujo completo. |
 | `ejecucion_servicio` | Registro operativo de un servicio concreto. Para transporte permite asociar conductor y vehiculo; para caminatas o actividades sin vehiculo esos campos quedan vacios. |
 
-## Autenticación, sesiones y auditoría
+## Autenticacion, sesiones y auditoria
 
 | Tabla | Para que se usa |
 | --- | --- |
-| `sesion_autenticacion` | Controla la sesión de un usuario: vigencia, último uso, cierre e invalidación. |
-| `refresh_token` | Guarda únicamente el hash de un refresh token de uso único y permite relacionar su rotación con el siguiente token. |
-| `access_token_revocado` | Conserva el `jti` de un JWT que debe bloquearse antes de su expiración natural. No guarda el JWT completo. |
-| `evento_autenticacion` | Auditoría de inicio de sesión, fallos, renovaciones, reutilización de refresh token y cierres de sesión. |
+| `sesion_autenticacion` | Controla la sesion de un usuario: vigencia, ultimo uso, cierre e invalidacion. |
+| `refresh_token` | Guarda unicamente el hash de un refresh token de uso unico y permite relacionar su rotacion con el siguiente token. |
+| `access_token_revocado` | Conserva el `jti` de un JWT que debe bloquearse antes de su expiracion natural. No guarda el JWT completo. |
+| `evento_autenticacion` | Auditoria de inicio de sesion, fallos, renovaciones, reutilizacion de refresh token y cierres de sesion. |
 
-Los visitantes pueden explorar experiencias y salidas públicas. Crear y gestionar reservas requiere una sesión autenticada.
+Los visitantes pueden explorar experiencias y salidas publicas. Crear y gestionar reservas requiere una sesion autenticada.
 
 ## Tipos de experiencia iniciales
 
@@ -101,8 +101,8 @@ La aplicacion tambien debera validar disponibilidad, transiciones de estado, reg
 | --- | --- |
 | `V1` | Estructura inicial: tipos PostgreSQL, tablas, relaciones, restricciones e integridad transversal. |
 | `V2` | Datos semilla: roles de usuario y clasificaciones iniciales de experiencias. |
-| `V3` | Sesiones, refresh tokens de un solo uso, revocación de access tokens y auditoría de autenticación. |
+| `V3` | Sesiones, refresh tokens de un solo uso, revocacion de access tokens y auditoria de autenticacion. |
 
 La creacion de la base PostgreSQL `rutasur` no es una migracion Flyway. Debe realizarse una vez por el administrador; luego Flyway aplica las versiones dentro de esa base.
 
-Consulta también el [modelo entidad-relación](Modelo-Entidad-Relacion-V1) para ver las relaciones completas.
+Consulta tambien el [modelo entidad-relacion](../architecture/modelo-entidad-relacion-v1.md) para ver las relaciones completas.
