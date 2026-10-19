@@ -1,0 +1,6 @@
+<h2 mat-dialog-title>{{ titulo }}</h2>
+<mat-dialog-content><ng-content /></mat-dialog-content>
+<mat-dialog-actions align="end">
+  <rs-boton texto="Cancelar" apariencia="texto" (accion)="cancelar.emit()" />
+  <rs-boton [texto]="textoConfirmar" (accion)="confirmar.emit()" />
+</mat-dialog-actions>

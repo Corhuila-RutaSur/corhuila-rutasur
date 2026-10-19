@@ -36,4 +36,16 @@ body {
   margin: 0;
   height: 100%;
 }
+
+:root {
+  --rs-color-error: #b3261e;
+  --rs-espacio-3: 1rem;
+  --rs-radio-sm: 0.5rem;
+  --rs-radio-md: 0.75rem;
+  --rs-sombra-suave: 0 2px 8px rgb(0 0 0 / 12%);
+}
+
+.notificacion-exito { --mat-snack-bar-button-color: #1b5e20; }
+.notificacion-error { --mat-snack-bar-button-color: var(--rs-color-error); }
+.notificacion-advertencia { --mat-snack-bar-button-color: #7a4300; }
 /* You can add global styles to this file, and also import other style files */

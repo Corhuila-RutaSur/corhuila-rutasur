@@ -1,0 +1,22 @@
+:host { display: inline-block; }
+
+.boton {
+  border: 1px solid transparent;
+  border-radius: var(--rs-radio-sm);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+  min-height: 2.5rem;
+  padding: 0.5rem 1rem;
+}
+
+.boton:focus-visible { outline: 3px solid #0097a7; outline-offset: 2px; }
+.boton:disabled { cursor: not-allowed; opacity: 0.6; }
+.boton-primario { background: #00838f; color: white; }
+.boton-secundario { background: transparent; border-color: #00838f; color: #00656f; }
+.boton-texto { background: transparent; color: #00656f; }
+
+.boton-peligro {
+  background: var(--rs-color-error);
+  color: white;
+}
