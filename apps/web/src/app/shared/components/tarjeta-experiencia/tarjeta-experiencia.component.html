@@ -1,0 +1,1 @@
+<a class="tarjeta" [routerLink]="['/experiencias',experiencia().id]"><img [src]="imagenPrincipal()" [alt]="experiencia().nombre"/><section><p>{{experiencia().destino}}</p><h2>{{experiencia().nombre}}</h2><span>{{experiencia().descripcion}}</span>@if(experiencia().duracionHoras){<small>{{experiencia().duracionHoras}} horas</small>}</section></a>

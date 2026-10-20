@@ -1,0 +1,25 @@
+<main class="administracion">
+  <aside>
+    <a class="marca" routerLink="/administracion">RutaSur <span>Admin</span></a>
+    <nav aria-label="Menú administrativo">
+      <a routerLink="/administracion">Resumen</a>
+      <a routerLink="/administracion/experiencias">Experiencias</a>
+      <a routerLink="/administracion/usuarios">Usuarios</a>
+      <a routerLink="/experiencias">Ver catálogo público</a>
+    </nav>
+    <button type="button" (click)="cerrarSesion()">Cerrar sesión</button>
+  </aside>
+  <section class="contenido">
+    <header>
+      <p>OPERACIÓN RUTASUR</p>
+      <h1>Panel administrativo</h1>
+      <span>Gestiona la oferta turística y las personas que hacen posible cada ruta.</span>
+    </header>
+    <section class="metricas" aria-label="Módulos disponibles">
+      <a routerLink="/administracion/experiencias"><strong>Experiencias</strong><span>Crea experiencias, imágenes, servicios y sus futuras salidas.</span></a>
+      <a routerLink="/administracion/usuarios"><strong>Usuarios</strong><span>Consulta usuarios y asigna perfiles operativos desde este espacio.</span></a>
+      <a routerLink="/experiencias"><strong>Catálogo</strong><span>Comprueba cómo se muestra la oferta al público.</span></a>
+    </section>
+    <section class="proximo"><h2>Siguiente paso</h2><p>Selecciona un módulo para comenzar su gestión. Las acciones administrativas requieren un usuario con rol ADMINISTRADOR.</p></section>
+  </section>
+</main>

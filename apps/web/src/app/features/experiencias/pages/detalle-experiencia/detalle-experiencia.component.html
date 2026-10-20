@@ -1,0 +1,82 @@
+<rs-navbar-publica />
+
+@if (experiencia(); as item) {
+  <main class="detalle">
+    <a class="volver" routerLink="/experiencias">← Volver al catálogo</a>
+
+    <section class="galeria">
+      @for (imagen of item.imagenes; track imagen.id) {
+        <img [src]="urlImagen(imagen.url)" [alt]="imagen.descripcion || item.nombre" />
+      }
+    </section>
+
+    <section class="introduccion">
+      <p class="destino">{{ item.destino }}</p>
+      <h1>{{ item.nombre }}</h1>
+      @if (item.duracionHoras) { <span class="duracion">{{ item.duracionHoras }} horas de experiencia</span> }
+      <article>{{ item.descripcion }}</article>
+      @if (item.recomendaciones) {
+        <aside><strong>Recomendaciones</strong><p>{{ item.recomendaciones }}</p></aside>
+      }
+    </section>
+
+    <section class="reserva" aria-labelledby="titulo-reserva">
+      <header><p class="eyebrow">ARMA TU EXPERIENCIA</p><h2 id="titulo-reserva">Elige fecha y servicios</h2><span>Los servicios se aplican para todos los participantes de la reserva.</span></header>
+
+      @if (salidas().length) {
+        <div class="salidas" role="list" aria-label="Salidas disponibles">
+          @for (salida of salidas(); track salida.id) {
+            <button type="button" class="salida" [class.activa]="salidaSeleccionadaId() === salida.id" (click)="seleccionarSalida(salida.id)">
+              <strong>{{ salida.fechaHoraInicio | date:'EEEE, d MMMM · h:mm a' }}</strong>
+              <span>{{ salida.cuposDisponibles }} cupos disponibles</span>
+            </button>
+          }
+        </div>
+
+        @if (cargandoOpciones()) {
+          <p class="estado">Cargando servicios disponibles…</p>
+        } @else if (programaciones().length) {
+          <div class="servicios-programados">
+            @for (programacion of programaciones(); track programacion.id) {
+              @if (servicioDe(programacion); as servicio) {
+                <button type="button" class="servicio-opcion" [class.seleccionado]="programacionesSeleccionadas().has(programacion.id)" (click)="alternarServicio(programacion.id)">
+                  <span class="check" aria-hidden="true">{{ programacionesSeleccionadas().has(programacion.id) ? '✓' : '' }}</span>
+                  <span class="contenido-servicio"><small>{{ servicio.tipo }}</small><strong>{{ servicio.nombre }}</strong>@if (servicio.descripcion) { <em>{{ servicio.descripcion }}</em> }</span>
+                  <b>{{ programacion.precioUnitario | currency:'COP':'symbol-narrow':'1.0-0' }}</b>
+                </button>
+              }
+            }
+          </div>
+          <footer class="resumen-reserva">
+            <div><span>Servicios seleccionados</span><strong>{{ programacionesSeleccionadas().size }}</strong></div>
+            <div><span>Total estimado por persona</span><strong>{{ totalSeleccionado() | currency:'COP':'symbol-narrow':'1.0-0' }}</strong></div>
+            <button type="button" class="boton-reservar" [disabled]="!programacionesSeleccionadas().size" (click)="continuarReserva()">{{ sesion.sesion() ? 'Continuar con la reserva' : 'Inicia sesión para reservar' }}</button>
+          </footer>
+
+          @if (mostrandoFormularioReserva()) {
+            <section class="formulario-reserva" aria-labelledby="titulo-participantes">
+              <header><h3 id="titulo-participantes">Participantes de la reserva</h3><p>Los servicios seleccionados se aplicarán por igual a cada participante.</p></header>
+              @for (participante of participantes; track $index; let indice = $index) {
+                <fieldset>
+                  <legend>Participante {{ indice + 1 }}</legend>
+                  <div class="campos-participante">
+                    <label>Tipo de documento<select [(ngModel)]="participante.tipoDocumento" [name]="'tipoDocumento' + indice"><option value="CC">Cédula de ciudadanía</option><option value="CE">Cédula de extranjería</option><option value="TI">Tarjeta de identidad</option><option value="PP">Pasaporte</option></select></label>
+                    <label>Número de documento<input [(ngModel)]="participante.numeroDocumento" [name]="'numeroDocumento' + indice" required /></label>
+                    <label>Nombres<input [(ngModel)]="participante.nombres" [name]="'nombres' + indice" required /></label>
+                    <label>Apellidos<input [(ngModel)]="participante.apellidos" [name]="'apellidos' + indice" required /></label>
+                    <label>Correo electrónico<input type="email" [(ngModel)]="participante.correo" [name]="'correo' + indice" required /></label>
+                    <label>Teléfono<input inputmode="numeric" [(ngModel)]="participante.telefono" [name]="'telefono' + indice" required /></label>
+                  </div>
+                  <div class="acciones-participante"><label class="responsable"><input type="radio" name="responsable" [checked]="participante.responsable" (change)="marcarResponsable(indice)" /> Responsable de la reserva</label>@if (participantes.length > 1) { <button type="button" class="texto" (click)="eliminarParticipante(indice)">Quitar participante</button> }</div>
+                </fieldset>
+              }
+              <button type="button" class="agregar-participante" (click)="agregarParticipante()">+ Agregar otro participante</button>
+              <label class="observaciones">Observaciones<textarea [(ngModel)]="observacionesReserva" name="observacionesReserva" rows="3" placeholder="Información adicional para la reserva (opcional)"></textarea></label>
+              <footer class="acciones-formulario"><button type="button" class="texto" (click)="mostrandoFormularioReserva.set(false)">Cancelar</button><button type="button" class="boton-reservar" [disabled]="guardandoReserva()" (click)="crearReserva()">{{ guardandoReserva() ? 'Creando reserva…' : 'Confirmar reserva' }}</button></footer>
+            </section>
+          }
+        } @else { <p class="estado">Esta salida todavía no tiene servicios disponibles para reserva.</p> }
+      } @else { <p class="estado">Por ahora no hay salidas abiertas para esta experiencia.</p> }
+    </section>
+  </main>
+} @else { <p class="cargando">Cargando experiencia…</p> }

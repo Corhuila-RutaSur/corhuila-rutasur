@@ -1,0 +1,44 @@
+<main class="configuracion">
+  <header class="encabezado">
+    <a class="volver" routerLink="/administracion/experiencias">← Volver a experiencias</a>
+    <p class="eyebrow">ADMINISTRACIÓN · EXPERIENCIAS</p>
+    <h1>Configurar experiencia</h1>
+    <p>Define los servicios que se pueden comprar y las fechas en que estará disponible la experiencia.</p>
+  </header>
+
+  <section class="panel" aria-labelledby="titulo-servicios">
+    <div class="titulo-panel"><span class="paso">1</span><div><h2 id="titulo-servicios">Servicios ofrecidos</h2><p>Agrega cada opción que el visitante podrá seleccionar en su reserva.</p></div></div>
+    <div class="formulario-grid tres-columnas">
+      <label><span>Tipo de servicio <b>*</b></span><select [(ngModel)]="servicio.tipo" name="tipoServicio"><option value="TRANSPORTE">Transporte</option><option value="ALOJAMIENTO">Alojamiento</option><option value="ACTIVIDAD">Actividad</option><option value="ALIMENTACION">Alimentación</option></select></label>
+      <label><span>Nombre del servicio <b>*</b></span><input [(ngModel)]="servicio.nombre" name="nombreServicio" maxlength="150" placeholder="Ej. Transporte ida y vuelta"/></label>
+      <label><span>Descripción</span><input [(ngModel)]="servicio.descripcion" name="descripcionServicio" placeholder="Qué incluye este servicio"/></label>
+    </div>
+    <div class="acciones"><button class="boton primario" type="button" (click)="crearServicio()">Agregar servicio</button></div>
+    @if (servicios().length) { <ul class="lista-resumen" aria-label="Servicios creados">@for (item of servicios(); track item.id) { <li><span class="etiqueta">{{ item.tipo }}</span><div><strong>{{ item.nombre }}</strong>@if (item.descripcion) { <small>{{ item.descripcion }}</small> }</div></li> }</ul> } @else { <p class="vacio">Aún no hay servicios configurados.</p> }
+  </section>
+
+  <section class="panel" aria-labelledby="titulo-salidas">
+    <div class="titulo-panel"><span class="paso">2</span><div><h2 id="titulo-salidas">Salidas y cupos</h2><p>Una salida es una fecha concreta para realizar esta experiencia.</p></div></div>
+    <div class="formulario-grid cuatro-columnas">
+      <label><span>Fecha y hora de inicio <b>*</b></span><input type="datetime-local" [(ngModel)]="salida.fechaHoraInicio" name="fechaHoraInicio"/></label>
+      <label><span>Fecha y hora de finalización</span><input type="datetime-local" [(ngModel)]="salida.fechaHoraFin" name="fechaHoraFin"/></label>
+      <label><span>Cupos totales <b>*</b></span><input type="number" min="1" [(ngModel)]="salida.cuposTotales" name="cuposTotales"/><small>Personas que pueden asistir.</small></label>
+      <label><span>Estado inicial <b>*</b></span><select [(ngModel)]="salida.estado" name="estadoSalida"><option value="PROGRAMADA">Programada</option><option value="ABIERTA">Abierta a reservas</option></select></label>
+    </div>
+    <label class="campo-completo"><span>Observaciones</span><textarea [(ngModel)]="salida.observaciones" name="observacionesSalida" rows="3" placeholder="Información operativa visible solo al equipo administrador"></textarea></label>
+    <div class="acciones"><button class="boton primario" type="button" (click)="crearSalida()">Crear salida</button></div>
+    @if (salidas().length) { <div class="salidas">@for (item of salidas(); track item.id) { <button class="salida" type="button" [class.activa]="salidaSeleccionada() === item.id" (click)="seleccionarSalida(item.id)"><strong>{{ item.fechaHoraInicio | date:'dd/MM/yyyy, h:mm a' }}</strong><span>{{ item.estado }} · {{ item.cuposDisponibles }} de {{ item.cuposTotales }} cupos disponibles</span></button> }</div> } @else { <p class="vacio">Crea la primera salida para continuar con la programación de servicios.</p> }
+  </section>
+
+  @if (salidaSeleccionada()) {
+    <section class="panel" aria-labelledby="titulo-programacion">
+      <div class="titulo-panel"><span class="paso">3</span><div><h2 id="titulo-programacion">Precio y disponibilidad por servicio</h2><p>Selecciona qué servicios estarán disponibles para la salida elegida.</p></div></div>
+      <div class="formulario-grid tres-columnas">
+        <label><span>Servicio <b>*</b></span><select [(ngModel)]="servicioProgramado" name="servicioProgramado"><option [ngValue]="null">Selecciona un servicio</option>@for (item of servicios(); track item.id) { <option [ngValue]="item.id">{{ item.nombre }} · {{ item.tipo }}</option> }</select></label>
+        <label><span>Precio por persona (COP) <b>*</b></span><input type="number" min="0" [(ngModel)]="precio" name="precioServicio" placeholder="0"/></label>
+        <label><span>Cupos para este servicio</span><input type="number" min="1" [(ngModel)]="cupos" name="cuposServicio" placeholder="Usar cupos generales"/><small>Déjalo vacío para usar los cupos de la salida.</small></label>
+      </div>
+      <div class="acciones"><button class="boton primario" type="button" (click)="programar()">Guardar programación</button></div>
+    </section>
+  }
+</main>

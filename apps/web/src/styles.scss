@@ -45,7 +45,26 @@ body {
   --rs-sombra-suave: 0 2px 8px rgb(0 0 0 / 12%);
 }
 
-.notificacion-exito { --mat-snack-bar-button-color: #1b5e20; }
-.notificacion-error { --mat-snack-bar-button-color: var(--rs-color-error); }
-.notificacion-advertencia { --mat-snack-bar-button-color: #7a4300; }
+.rs-contenedor-toastr.mat-mdc-snack-bar-container {
+  --mdc-snackbar-container-color: transparent;
+  --mat-snack-bar-container-color: transparent;
+  --mdc-snackbar-supporting-text-color: inherit;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  min-width: 0 !important;
+  outline: 0 !important;
+  padding: 0 !important;
+}
+
+.rs-contenedor-toastr.mat-mdc-snack-bar-container .mat-mdc-snack-bar-surface,
+.rs-contenedor-toastr.mat-mdc-snack-bar-container .mdc-snackbar__surface {
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+}
 /* You can add global styles to this file, and also import other style files */

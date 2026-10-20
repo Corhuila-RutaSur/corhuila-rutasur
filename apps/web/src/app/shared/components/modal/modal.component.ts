@@ -1,18 +1,4 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
-import { MatDialogModule } from '@angular/material/dialog';
-import { BotonComponent } from '../boton/boton.component';
-
-/** Contenido reutilizable para dialogos de confirmacion. */
-@Component({
-  selector: 'rs-modal',
-  imports: [MatDialogModule, BotonComponent],
-  templateUrl: './modal.component.html',
-  styleUrl: './modal.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-})
-export class ModalComponent {
-  @Input({ required: true }) titulo = '';
-  @Input() textoConfirmar = 'Confirmar';
-  @Output() confirmar = new EventEmitter<void>();
-  @Output() cancelar = new EventEmitter<void>();
-}
+/** Modal reutilizable de RutaSur para acciones que requieren confirmación explícita. */
+@Component({ selector: 'rs-modal', templateUrl: './modal.component.html', styleUrl: './modal.component.scss', changeDetection: ChangeDetectionStrategy.OnPush })
+export class ModalComponent { @Input() abierto = false; @Input({ required: true }) titulo = ''; @Input() descripcion = ''; @Input() textoConfirmar = 'Confirmar'; @Input() variante: 'peligro' | 'principal' = 'principal'; @Output() confirmar = new EventEmitter<void>(); @Output() cancelar = new EventEmitter<void>(); }
