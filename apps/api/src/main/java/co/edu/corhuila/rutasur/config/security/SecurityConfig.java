@@ -1,6 +1,5 @@
 package co.edu.corhuila.rutasur.config.security;
 
-import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -11,13 +10,20 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import lombok.RequiredArgsConstructor;
 
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
+@EnableConfigurationProperties(JwtProperties.class)
+@RequiredArgsConstructor
 public class SecurityConfig {
+    private final FiltroJwt filtroJwt;
+    private final EscritorRespuestaSeguridad escritorRespuestaSeguridad;
 
     /**
      * Construye el codificador irreversible de contrasenias para las credenciales locales.
@@ -42,6 +48,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(filtroJwt, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(
@@ -52,13 +59,13 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "/scalar/**",
+                                "/uploads/**",
                                 "/api/v1/public/**")
                         .permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(
-                        (request, response, authenticationException) -> response.sendError(
-                                HttpServletResponse.SC_UNAUTHORIZED,
-                                "Authentication is required to access this resource.")))
+                        (request, response, authenticationException) -> escritorRespuestaSeguridad.escribir(
+                                response, 401, "autenticacion.requerida")))
                 .build();
     }
 }

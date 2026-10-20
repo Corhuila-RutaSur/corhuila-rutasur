@@ -2,6 +2,8 @@ package co.edu.corhuila.rutasur.api;
 
 import co.edu.corhuila.rutasur.dto.request.UsuarioActualizacionRequest;
 import co.edu.corhuila.rutasur.dto.request.UsuarioRegistroRequest;
+import co.edu.corhuila.rutasur.dto.request.UsuarioRolesActualizacionRequest;
+import co.edu.corhuila.rutasur.dto.request.UsuarioAdministracionCreacionRequest;
 import co.edu.corhuila.rutasur.dto.response.UsuarioResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -26,6 +28,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
  */
 @Tag(name = "Usuarios", description = "Registro y administracion logica de cuentas de usuario")
 public interface UsuarioApi {
+
+    @Operation(summary = "Crear usuario administrativo", description = "Crea una cuenta y asigna uno o varios roles; requiere ADMINISTRADOR.")
+    @SecurityRequirement(name = "bearerAuth")
+    @PostMapping("/api/v1/usuarios")
+    ResponseEntity<UsuarioResponse> registrarAdministrativo(@Valid @RequestBody UsuarioAdministracionCreacionRequest solicitud);
 
     /**
      * Registra una nueva cuenta desde un canal publico.
@@ -85,6 +92,12 @@ public interface UsuarioApi {
     @PutMapping("/api/v1/usuarios/{id}")
     ResponseEntity<UsuarioResponse> actualizar(
             @PathVariable Long id, @Valid @RequestBody UsuarioActualizacionRequest solicitud);
+
+    @Operation(summary = "Asignar roles", description = "Reemplaza los roles de una cuenta; requiere ADMINISTRADOR.")
+    @SecurityRequirement(name = "bearerAuth")
+    @PutMapping("/api/v1/usuarios/{id}/roles")
+    ResponseEntity<UsuarioResponse> actualizarRoles(
+            @PathVariable Long id, @Valid @RequestBody UsuarioRolesActualizacionRequest solicitud);
 
     /**
      * Inactiva una cuenta y conserva su informacion historica.

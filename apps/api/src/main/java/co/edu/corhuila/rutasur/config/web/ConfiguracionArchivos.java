@@ -1,0 +1,2 @@
+package co.edu.corhuila.rutasur.config.web; import org.springframework.beans.factory.annotation.Value; import org.springframework.context.annotation.Configuration; import org.springframework.web.servlet.config.annotation.*;
+@Configuration public class ConfiguracionArchivos implements WebMvcConfigurer {@Value("${app.archivos.directorio:${user.home}/RutaSurUploads}") private String directorio; @Override public void addResourceHandlers(ResourceHandlerRegistry registro){registro.addResourceHandler("/uploads/**").addResourceLocations("file:"+directorio.replace('\\','/')+"/");}}

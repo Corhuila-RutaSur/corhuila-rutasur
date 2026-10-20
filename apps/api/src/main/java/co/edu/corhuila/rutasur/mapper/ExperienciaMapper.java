@@ -18,5 +18,6 @@ public interface ExperienciaMapper {
     @Mapping(target = "activo", ignore = true) @Mapping(target = "creadoEn", ignore = true)
     @Mapping(target = "actualizadoEn", ignore = true)
     void actualizarEntidad(ExperienciaActualizacionRequest solicitud, @MappingTarget Experiencia experiencia);
+    @Mapping(target = "imagenes", ignore = true)
     ExperienciaResponse aRespuesta(Experiencia experiencia);
 }

@@ -21,9 +21,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 @Tag(name = "Reservas", description = "Reservas configurables de experiencias")
 public interface ReservaApi {
     /** Crea una reserva pendiente y congela precios y cupos. */
-    @Operation(summary = "Crear reserva", description = "Ruta pública temporal hasta implementar JWT.")
+    @Operation(summary = "Crear reserva", description = "Requiere un usuario autenticado; solo puede crear su propia reserva.") @SecurityRequirement(name = "bearerAuth")
     @ApiResponse(responseCode = "201", description = "Reserva creada")
-    @PostMapping("/api/v1/public/reservas")
+    @PostMapping("/api/v1/reservas")
     ResponseEntity<ReservaResponse> crear(@Valid @RequestBody ReservaCreacionRequest solicitud);
 
     /** Consulta una reserva vigente por identificador. */

@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
+import jakarta.validation.Valid; import java.util.List;
 
 /** Datos editables de una experiencia existente; el autor permanece inmutable. */
 public record ExperienciaActualizacionRequest(
@@ -12,4 +13,4 @@ public record ExperienciaActualizacionRequest(
         @NotBlank String descripcion,
         @NotBlank @Size(max = 150) String destino,
         @Positive Integer duracionHoras,
-        String recomendaciones) { }
+        String recomendaciones, @Valid List<ExperienciaImagenRequest> imagenes) { }

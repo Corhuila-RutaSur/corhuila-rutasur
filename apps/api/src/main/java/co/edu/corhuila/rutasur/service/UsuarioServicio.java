@@ -14,14 +14,19 @@ import co.edu.corhuila.rutasur.repository.UsuarioTipoRepositorio;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Implementa los casos de uso de registro y administracion logica de usuarios.
  */
 @Service
+@RequiredArgsConstructor
+@Slf4j
 public class UsuarioServicio {
 
     private static final String ROL_CLIENTE = "CLIENTE";
@@ -33,28 +38,6 @@ public class UsuarioServicio {
     private final UsuarioTipoRepositorio usuarioTipoRepositorio;
 
     /**
-     * Construye el servicio con sus dependencias de persistencia, mapeo y seguridad.
-     *
-     * @param usuarioRepositorio acceso a cuentas de usuario.
-     * @param usuarioMapper conversor de contratos y entidades.
-     * @param codificadorContrasenias codificador BCrypt configurado.
-     * @param tipoUsuarioRepositorio acceso al catalogo de roles.
-     * @param usuarioTipoRepositorio persistencia de roles asignados.
-     */
-    public UsuarioServicio(
-            UsuarioRepositorio usuarioRepositorio,
-            UsuarioMapper usuarioMapper,
-            PasswordEncoder codificadorContrasenias,
-            TipoUsuarioRepositorio tipoUsuarioRepositorio,
-            UsuarioTipoRepositorio usuarioTipoRepositorio) {
-        this.usuarioRepositorio = usuarioRepositorio;
-        this.usuarioMapper = usuarioMapper;
-        this.codificadorContrasenias = codificadorContrasenias;
-        this.tipoUsuarioRepositorio = tipoUsuarioRepositorio;
-        this.usuarioTipoRepositorio = usuarioTipoRepositorio;
-    }
-
-    /**
      * Registra una cuenta activa con contraseña codificada mediante BCrypt.
      *
      * @param solicitud datos validados de registro.
@@ -63,6 +46,7 @@ public class UsuarioServicio {
      */
     @Transactional
     public UsuarioResponse registrar(UsuarioRegistroRequest solicitud) {
+        log.info("evento=usuario_registro_inicio");
         Usuario usuario = usuarioMapper.aEntidad(solicitud);
         normalizarDatos(usuario);
         validarUnicidad(usuario, null);
@@ -70,7 +54,23 @@ public class UsuarioServicio {
         usuario.setActivo(true);
         Usuario usuarioCreado = usuarioRepositorio.save(usuario);
         asignarRolCliente(usuarioCreado);
+        log.info("evento=usuario_registro_exitoso usuarioId={} rol={}", usuarioCreado.getId(), ROL_CLIENTE);
         return usuarioMapper.aRespuesta(usuarioCreado);
+    }
+
+    /** Crea una cuenta desde administración con los roles definidos por el administrador. */
+    @Transactional
+    public UsuarioResponse registrarAdministrativo(UsuarioRegistroRequest solicitud, List<String> nombresRoles) {
+        log.info("evento=usuario_administrativo_registro_inicio cantidadRoles={}", nombresRoles.size());
+        Usuario usuario = usuarioMapper.aEntidad(solicitud);
+        normalizarDatos(usuario);
+        validarUnicidad(usuario, null);
+        usuario.setPasswordHash(codificadorContrasenias.encode(solicitud.contrasenia()));
+        usuario.setActivo(true);
+        Usuario creado = usuarioRepositorio.save(usuario);
+        asignarRoles(creado, nombresRoles);
+        log.info("evento=usuario_administrativo_registro_exitoso usuarioId={}", creado.getId());
+        return usuarioMapper.aRespuesta(creado);
     }
 
     /**
@@ -82,6 +82,7 @@ public class UsuarioServicio {
      */
     @Transactional(readOnly = true)
     public UsuarioResponse consultarPorId(Long id) {
+        log.info("evento=usuario_consulta_inicio usuarioId={}", id);
         return usuarioMapper.aRespuesta(obtenerUsuarioActivo(id));
     }
 
@@ -92,9 +93,12 @@ public class UsuarioServicio {
      */
     @Transactional(readOnly = true)
     public List<UsuarioResponse> consultarActivos() {
-        return usuarioRepositorio.findByActivoTrueOrderByNombresAscApellidosAsc().stream()
+        log.info("evento=usuarios_consulta_activos_inicio");
+        List<UsuarioResponse> usuarios = usuarioRepositorio.findByActivoTrueOrderByNombresAscApellidosAsc().stream()
                 .map(usuarioMapper::aRespuesta)
                 .toList();
+        log.info("evento=usuarios_consulta_activos_exitoso cantidad={}", usuarios.size());
+        return usuarios;
     }
 
     /**
@@ -107,10 +111,12 @@ public class UsuarioServicio {
      */
     @Transactional
     public UsuarioResponse actualizar(Long id, UsuarioActualizacionRequest solicitud) {
+        log.info("evento=usuario_actualizacion_inicio usuarioId={}", id);
         Usuario usuario = obtenerUsuarioActivo(id);
         usuarioMapper.actualizarEntidad(solicitud, usuario);
         normalizarDatos(usuario);
         validarUnicidad(usuario, id);
+        log.info("evento=usuario_actualizacion_exitosa usuarioId={}", id);
         return usuarioMapper.aRespuesta(usuario);
     }
 
@@ -122,10 +128,23 @@ public class UsuarioServicio {
      */
     @Transactional
     public void eliminarLogicamente(Long id) {
+        log.info("evento=usuario_inactivacion_inicio usuarioId={}", id);
         int registrosActualizados = usuarioRepositorio.desactivarPorId(id, OffsetDateTime.now());
         if (registrosActualizados == 0) {
             throw new ExcepcionReglaNegocio("usuario.no.encontrado");
         }
+        log.info("evento=usuario_inactivacion_exitosa usuarioId={}", id);
+    }
+
+    /** Reemplaza los roles de una cuenta desde el módulo administrativo. */
+    @Transactional
+    public UsuarioResponse actualizarRoles(Long id, List<String> nombresRoles) {
+        log.info("evento=usuario_roles_actualizacion_inicio usuarioId={} cantidadRoles={}", id, nombresRoles.size());
+        Usuario usuario = obtenerUsuarioActivo(id);
+        usuarioTipoRepositorio.deleteByUsuarioId(usuario.getId());
+        asignarRoles(usuario, nombresRoles);
+        log.info("evento=usuario_roles_actualizacion_exitosa usuarioId={}", id);
+        return usuarioMapper.aRespuesta(usuario);
     }
 
     /**
@@ -228,5 +247,15 @@ public class UsuarioServicio {
         TipoUsuario rolCliente = tipoUsuarioRepositorio.findByNombreAndActivoTrue(ROL_CLIENTE)
                 .orElseThrow(() -> new ExcepcionReglaNegocio("usuario.rol_cliente.no_encontrado"));
         usuarioTipoRepositorio.save(new UsuarioTipo(usuario, rolCliente));
+    }
+
+    /** Valida y asigna la colección de roles de administración a una cuenta. */
+    private void asignarRoles(Usuario usuario, List<String> nombresRoles) {
+        List<String> rolesNormalizados = nombresRoles.stream().map(nombre -> nombre.trim().toUpperCase(Locale.ROOT)).distinct().toList();
+        List<TipoUsuario> roles = tipoUsuarioRepositorio.findByNombreInAndActivoTrue(rolesNormalizados);
+        if (roles.size() != rolesNormalizados.size()) {
+            throw new ExcepcionReglaNegocio("usuario.rol.no_encontrado");
+        }
+        usuarioTipoRepositorio.saveAll(roles.stream().map(rol -> new UsuarioTipo(usuario, rol)).toList());
     }
 }

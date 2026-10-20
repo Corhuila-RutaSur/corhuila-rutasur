@@ -35,8 +35,16 @@ management:
       show-details: never
 
 app:
+  archivos:
+    directorio: ${RUTASUR_UPLOADS_DIR:${user.home}/RutaSurUploads}
+  security:
+    jwt:
+      # Clave exclusiva de desarrollo académico. En producción se reemplaza por un secreto externo.
+      secret: VGhpcy1pcy1hLWRldmVsb3BtZW50LWtleS13aXRoLTMyLWJ5dGVzLW1pbmltdW0h
+      access-token-minutos: ${JWT_ACCESS_TOKEN_MINUTES:15}
+      refresh-token-minutos: ${JWT_REFRESH_TOKEN_MINUTES:1440}
   cors:
-    allowed-origin-patterns: ${CORS_ALLOWED_ORIGINS:http://localhost:4200,http://127.0.0.1:4200}
+    allowed-origin-patterns: ${CORS_ALLOWED_ORIGINS:http://localhost:4200,http://127.0.0.1:4200,http://localhost:4201,http://127.0.0.1:4201}
     allowed-methods: GET,POST,PUT,PATCH,DELETE,OPTIONS
     allowed-headers: Authorization,Content-Type,Accept,Origin,X-Requested-With
     exposed-headers: Location

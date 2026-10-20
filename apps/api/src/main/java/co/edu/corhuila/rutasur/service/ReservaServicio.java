@@ -26,9 +26,13 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /** Implementa el ciclo de vida inicial de reservas configurables. */
 @Service
+@RequiredArgsConstructor
+@Slf4j
 public class ReservaServicio {
     private final ReservaRepositorio reservaRepositorio;
     private final UsuarioRepositorio usuarioRepositorio;
@@ -37,21 +41,10 @@ public class ReservaServicio {
     private final DetalleParticipanteRepositorio detalleParticipanteRepositorio;
     private final ReservaMapper reservaMapper;
 
-    /** Construye el servicio con sus colaboradores de persistencia. */
-    public ReservaServicio(ReservaRepositorio reservaRepositorio, UsuarioRepositorio usuarioRepositorio,
-            ParticipanteReservaRepositorio participanteRepositorio, DetalleReservaRepositorio detalleRepositorio,
-            DetalleParticipanteRepositorio detalleParticipanteRepositorio, ReservaMapper reservaMapper) {
-        this.reservaRepositorio = reservaRepositorio;
-        this.usuarioRepositorio = usuarioRepositorio;
-        this.participanteRepositorio = participanteRepositorio;
-        this.detalleRepositorio = detalleRepositorio;
-        this.detalleParticipanteRepositorio = detalleParticipanteRepositorio;
-        this.reservaMapper = reservaMapper;
-    }
-
     /** Crea una reserva pendiente, descuenta cupos y congela los precios vigentes. */
     @Transactional
     public ReservaResponse crear(ReservaCreacionRequest solicitud) {
+        log.info("evento=reserva_creacion_inicio usuarioId={} salidaId={} participantes={} servicios={}", solicitud.usuarioId(), solicitud.salidaExperienciaId(), solicitud.participantes().size(), solicitud.programacionesServicioIds().size());
         validarUsuarioActivo(solicitud.usuarioId());
         validarResponsable(solicitud.participantes());
         Map<Long, Long> cantidades = contarServicios(solicitud.programacionesServicioIds(), solicitud.participantes().size());
@@ -59,21 +52,25 @@ public class ReservaServicio {
         validarCuposSalida(salida, solicitud.participantes().size());
         Map<Long, ProgramacionReservaProyeccion> programaciones = bloquearYValidarProgramaciones(
                 solicitud.salidaExperienciaId(), cantidades);
+        log.info("evento=reserva_disponibilidad_validada salidaId={} participantes={}", salida.getId(), solicitud.participantes().size());
         descontarCupos(salida.getId(), cantidades, programaciones, solicitud.participantes().size());
         Reserva reserva = guardarCabecera(solicitud, cantidades, programaciones);
         guardarParticipantesYAsignaciones(reserva, solicitud.participantes(), solicitud.programacionesServicioIds(), cantidades, programaciones);
+        log.info("evento=reserva_creacion_exitosa reservaId={} codigo={} participantes={}", reserva.getId(), reserva.getCodigo(), solicitud.participantes().size());
         return reservaMapper.aRespuesta(reserva);
     }
 
     /** Consulta una reserva que no haya sido cancelada. */
     @Transactional(readOnly = true)
     public ReservaResponse consultarPorId(Long id) {
+        log.info("evento=reserva_consulta_inicio reservaId={}", id);
         return reservaMapper.aRespuesta(obtenerReservaVigente(id));
     }
 
     /** Lista las reservas de un usuario, incluidos sus estados historicos. */
     @Transactional(readOnly = true)
     public List<ReservaResponse> consultarPorUsuario(Long usuarioId) {
+        log.info("evento=reservas_usuario_consulta_inicio usuarioId={}", usuarioId);
         return reservaRepositorio.findByUsuarioIdOrderByFechaReservaDesc(usuarioId).stream()
                 .map(reservaMapper::aRespuesta).toList();
     }
@@ -81,23 +78,27 @@ public class ReservaServicio {
     /** Actualiza observaciones de una reserva mientras se encuentra pendiente. */
     @Transactional
     public ReservaResponse actualizar(Long id, ReservaActualizacionRequest solicitud) {
+        log.info("evento=reserva_actualizacion_inicio reservaId={}", id);
         Reserva reserva = obtenerReservaVigente(id);
         if (reserva.getEstado() != EstadoReserva.PENDIENTE) {
             throw new ExcepcionReglaNegocio("reserva.actualizacion.no_permitida");
         }
         reserva.setObservaciones(solicitud.observaciones().trim());
+        log.info("evento=reserva_actualizacion_exitosa reservaId={}", id);
         return reservaMapper.aRespuesta(reserva);
     }
 
     /** Cancela lógicamente una reserva y restituye sus cupos disponibles. */
     @Transactional
     public void cancelar(Long id) {
+        log.info("evento=reserva_cancelacion_inicio reservaId={}", id);
         Reserva reserva = obtenerReservaVigente(id);
         if (reserva.getEstado() == EstadoReserva.FINALIZADA) {
             throw new ExcepcionReglaNegocio("reserva.cancelacion.no_permitida");
         }
         restaurarCupos(reserva);
         reserva.setEstado(EstadoReserva.CANCELADA);
+        log.info("evento=reserva_cancelacion_exitosa reservaId={}", id);
     }
 
     /** Valida que la cuenta compradora exista y permanezca activa. */
