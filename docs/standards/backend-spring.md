@@ -22,6 +22,8 @@ Orden de consulta para una implementación:
 - Todas las solicitudes y respuestas HTTP se implementan con `record`; no se usan entidades JPA ni clases DTO mutables como contratos de API.
 - Cada controlador implementa una interfaz ubicada en `api/` que contiene el contrato HTTP y las anotaciones OpenAPI. El controlador implementa el comportamiento; la interfaz describe el contrato público.
 - Cada método expuesto por la interfaz API declara resumen, descripción, respuestas HTTP y modelos relevantes de OpenAPI.
+- Los beans administrados por Spring (`@Service`, `@Component`, `@Repository`, `@Configuration` y controladores) declaran sus dependencias como campos `final` y usan `@RequiredArgsConstructor` de Lombok. No se escriben constructores manuales que únicamente asignen esas dependencias.
+- Se permite un constructor explícito únicamente cuando debe preservar una invariante no representable por Lombok, por ejemplo calcular o validar un valor derivado durante la construcción; el motivo debe documentarse con Javadoc.
 
 ## Idioma, nombres y documentación de código
 
@@ -71,10 +73,23 @@ Orden de consulta para una implementación:
 - Cada excepción de negocio porta un código de error estable, no un mensaje literal. Ejemplo: `reserva.no_encontrada`.
 - El código de error se resuelve mediante una clase central de extracción de mensajes (`ResolvedorMensajes`) que usa `MessageSource`; ningún mensaje visible al cliente se escribe directamente en Java.
 - Los textos de error residen en `src/main/resources/message.properties` como idioma base. Idiomas adicionales usan el patrón `message_{locale}.properties`, por ejemplo `message_en.properties`.
-- La respuesta de error estándar debe incluir como mínimo código HTTP, código funcional, mensaje localizado, ruta y fecha/hora; no expone detalles internos.
+- Toda respuesta HTTP, exitosa o fallida, usa `RespuestaGeneral<T>`: `codigoHttp`, `codigo`, `mensaje` y `data`.
+- `RespuestaGeneral<T>` usa `@JsonInclude(JsonInclude.Include.NON_NULL)`; por tanto, los campos sin valor, incluido `data`, no viajan como `null`.
+- Los DTO de respuesta se encapsulan exclusivamente en `data`; la estructura externa no cambia entre endpoints ni estados HTTP.
+- Los errores de validación usan un mapa `campo -> mensaje` como `data`. Los errores sin detalle no incluyen `data`.
 - No se exponen detalles internos, SQL, trazas, contraseñas, hashes ni tokens.
 - Los endpoints protegidos validan autenticación y autorización en el servidor.
+- Un JWT vencido responde `401` con el código `autenticacion.token.expirado`; el frontend debe intentar una renovación con refresh token. Un JWT malformado, revocado o no válido responde `401` con `autenticacion.token.invalido` y no debe renovarse automáticamente.
 - Los endpoints públicos se declaran explícitamente bajo `/api/v1/public/**`; no se hacen públicos por omisión.
+
+## Trazabilidad: logs miga de pan
+
+1. Todo flujo de negocio expuesto por un servicio debe registrar migas de pan con `@Slf4j`: inicio, decisiones relevantes, resultado exitoso y rechazo relevante.
+2. Cada evento usa el formato `evento=nombre_descriptivo atributo=valor`; el `FiltroTrazabilidad` añade y conserva el identificador `traza` común para reconstruir toda la solicitud.
+3. Las migas deben revelar el progreso del caso de uso, por ejemplo: `reserva_creacion_inicio`, `reserva_disponibilidad_validada` y `reserva_creacion_exitosa`.
+4. Los rechazos de regla de negocio y excepciones inesperadas se registran centralmente en `ManejadorGlobalExcepciones`, asociados a ruta, código funcional, estado y traza.
+5. Está prohibido registrar contraseñas, JWT, refresh tokens, hashes, encabezados `Authorization`, cuerpos completos, correos, documentos, teléfonos u otros datos personales innecesarios.
+6. Se registran identificadores técnicos mínimos (`usuarioId`, `reservaId`, `sesionId`) solo cuando permiten auditar el flujo sin revelar secretos.
 
 ## Pruebas mínimas
 
@@ -86,8 +101,8 @@ Cada caso de uso nuevo o modificado debe probar, como mínimo:
 
 ## Convenciones de nombres
 
-- Clases: inglés, singular y orientadas al dominio (`ReservaService`, `ExperienciaRepository`).
+- Clases: español, singular y orientadas al dominio (`ServicioReserva`, `RepositorioExperiencia`).
 - Endpoints: sustantivos plurales en minúscula y con guiones solo si mejora legibilidad.
-- DTOs: sufijos `Request` y `Response`.
+- DTOs: sufijos `Request` y `Response` mientras se mantenga la convención de Spring; sus atributos y nombres de dominio se escriben en español.
 - Proyecciones: sufijo `Projection` o un nombre que exprese la vista (`ReservaResumenProjection`).
 - Migraciones: `V{n}__verbo_objeto.sql`, por ejemplo `V4__add_reservation_cancellation_reason.sql`.

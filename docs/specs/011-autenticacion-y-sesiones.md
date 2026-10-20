@@ -56,6 +56,31 @@ Permitir que solo usuarios autenticados creen y gestionen reservas, mientras el 
 3. Marca el refresh token como usado.
 4. Emite un nuevo par de tokens y relaciona el refresh anterior con el nuevo.
 
+### Access token vencido y renovación desde el cliente
+
+1. El cliente invoca un endpoint protegido con el access token en `Authorization: Bearer <access-token>`.
+2. Si el JWT está vencido, la API responde `401` con el código `autenticacion.token.expirado`.
+3. Solo ante ese código, el cliente puede invocar `POST /api/v1/public/autenticacion/refresh` enviando **únicamente** el `refreshToken`. El access token vencido no se envía ni participa en la renovación.
+4. Si la renovación es correcta, el cliente reemplaza de forma atómica su par de tokens y repite una única vez la solicitud original.
+5. Si la respuesta es `autenticacion.token.invalido`, el cliente no intenta renovar automáticamente: elimina sus credenciales locales y solicita un nuevo inicio de sesión.
+
+### Vencimiento de refresh y sesión
+
+- La vigencia del access token se configura con `JWT_ACCESS_TOKEN_MINUTES` (15 minutos por defecto).
+- La vigencia del refresh token y de la sesión se configura con `JWT_REFRESH_TOKEN_MINUTES` (1.440 minutos o 24 horas por defecto).
+- La sesión tiene un límite máximo contado desde el login. Rotar un refresh token no prolonga indefinidamente su expiración.
+- Si el refresh token o la sesión vencieron, la API responde `401` con `autenticacion.refresh.expirado`. El cliente elimina sus tokens y redirige al login.
+- Si el refresh no existe, fue revocado, ya fue usado o su sesión está invalidada, la API responde `401` con `autenticacion.refresh.invalido`. Ante un refresh ya usado se invalida toda la sesión para mitigar el replay de un token robado.
+
+### Códigos que interpreta el frontend
+
+| Código | Significado | Acción del frontend |
+| --- | --- | --- |
+| `autenticacion.token.expirado` | El access token superó su vigencia. | Intentar una renovación una sola vez. |
+| `autenticacion.token.invalido` | El access token es inválido, revocado o está alterado. | Limpiar sesión y mostrar login. |
+| `autenticacion.refresh.expirado` | La sesión o su refresh token vencieron. | Limpiar sesión y mostrar login. |
+| `autenticacion.refresh.invalido` | Refresh inexistente, revocado o reutilizado. | Limpiar sesión y mostrar login. |
+
 ### Reutilización de refresh token
 
 1. El sistema detecta un refresh token previamente usado o revocado.

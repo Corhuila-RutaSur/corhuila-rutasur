@@ -99,6 +99,7 @@ DB_URL=jdbc:postgresql://localhost:5433/rutasur
 DB_USERNAME=postgres
 DB_PASSWORD=tu_contrasena
 CORS_ALLOWED_ORIGINS=http://localhost:4200
+JWT_SECRET=secreto_base64_de_al_menos_32_bytes
 ```
 
 ### Backend
@@ -125,6 +126,10 @@ npm start
 ```
 
 La aplicación web se sirve normalmente en `http://localhost:4200`.
+
+## Contrato de respuestas y autenticación
+
+Todas las respuestas de la API usan `RespuestaGeneral<T>`: `codigoHttp`, `codigo`, `mensaje` y `data`. Los campos nulos se omiten. Un access token vencido devuelve `401` con `autenticacion.token.expirado`, señal para que el frontend intente renovar la sesión; un token inválido, revocado o malformado devuelve `autenticacion.token.invalido`.
 
 ## Reglas de contribución y documentación
 
