@@ -9,7 +9,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+
 import java.time.OffsetDateTime;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -40,7 +42,7 @@ public class UsuarioTipo {
     /**
      * Crea una asignacion de rol para una cuenta recien registrada.
      *
-     * @param usuario cuenta a la que se asigna el rol.
+     * @param usuario     cuenta a la que se asigna el rol.
      * @param tipoUsuario rol funcional asignado.
      */
     public UsuarioTipo(Usuario usuario, TipoUsuario tipoUsuario) {

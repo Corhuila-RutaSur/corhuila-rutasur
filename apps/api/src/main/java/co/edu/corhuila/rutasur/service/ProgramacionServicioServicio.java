@@ -8,13 +8,17 @@ import co.edu.corhuila.rutasur.exception.ExcepcionReglaNegocio;
 import co.edu.corhuila.rutasur.repository.ProgramacionServicioRepositorio;
 import co.edu.corhuila.rutasur.repository.SalidaExperienciaRepositorio;
 import co.edu.corhuila.rutasur.repository.ServicioExperienciaRepositorio;
+
 import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/** Gestiona los servicios concretos que una salida pone a disposición de sus reservas. */
+/**
+ * Gestiona los servicios concretos que una salida pone a disposición de sus reservas.
+ */
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -24,7 +28,9 @@ public class ProgramacionServicioServicio {
     private final SalidaExperienciaRepositorio salidaRepositorio;
     private final ServicioExperienciaRepositorio servicioRepositorio;
 
-    /** Crea el precio y la disponibilidad de un servicio para una salida específica. */
+    /**
+     * Crea el precio y la disponibilidad de un servicio para una salida específica.
+     */
     @Transactional
     public ProgramacionServicioResponse crear(Long salidaId, ProgramacionServicioRequest solicitud) {
         log.info("evento=programacion_servicio_creacion_inicio salidaId={} servicioId={}",
@@ -42,7 +48,9 @@ public class ProgramacionServicioServicio {
         return aRespuesta(creada);
     }
 
-    /** Lista las programaciones que siguen vigentes para una salida. */
+    /**
+     * Lista las programaciones que siguen vigentes para una salida.
+     */
     @Transactional(readOnly = true)
     public List<ProgramacionServicioResponse> listar(Long salidaId) {
         log.info("evento=programaciones_consulta_inicio salidaId={}", salidaId);
@@ -51,7 +59,9 @@ public class ProgramacionServicioServicio {
                 .toList();
     }
 
-    /** Actualiza precio o cupos de una programación vigente. */
+    /**
+     * Actualiza precio o cupos de una programación vigente.
+     */
     @Transactional
     public ProgramacionServicioResponse actualizar(Long salidaId, Long id, ProgramacionServicioRequest solicitud) {
         log.info("evento=programacion_servicio_actualizacion_inicio salidaId={} programacionId={}", salidaId, id);
@@ -61,7 +71,9 @@ public class ProgramacionServicioServicio {
         return aRespuesta(programacion);
     }
 
-    /** Inactiva una programación sin eliminar las reservas históricas asociadas. */
+    /**
+     * Inactiva una programación sin eliminar las reservas históricas asociadas.
+     */
     @Transactional
     public void inactivar(Long salidaId, Long id) {
         log.info("evento=programacion_servicio_inactivacion_inicio salidaId={} programacionId={}", salidaId, id);
@@ -69,32 +81,42 @@ public class ProgramacionServicioServicio {
         log.info("evento=programacion_servicio_inactivacion_exitosa salidaId={} programacionId={}", salidaId, id);
     }
 
-    /** Obtiene la salida requerida para la programación. */
+    /**
+     * Obtiene la salida requerida para la programación.
+     */
     private SalidaExperiencia obtenerSalida(Long salidaId) {
         return salidaRepositorio.findById(salidaId)
                 .orElseThrow(() -> new ExcepcionReglaNegocio("salida.no.encontrada"));
     }
 
-    /** Verifica que un servicio activo pertenezca a la misma experiencia de la salida. */
+    /**
+     * Verifica que un servicio activo pertenezca a la misma experiencia de la salida.
+     */
     private void validarServicioPerteneceExperiencia(Long servicioId, Long experienciaId) {
         servicioRepositorio.findByIdAndExperienciaIdAndActivoTrue(servicioId, experienciaId)
                 .orElseThrow(() -> new ExcepcionReglaNegocio("servicio.experiencia.no_encontrado"));
     }
 
-    /** Evita programar dos veces la misma opción comercial en una salida. */
+    /**
+     * Evita programar dos veces la misma opción comercial en una salida.
+     */
     private void validarNoDuplicada(Long salidaId, Long servicioId) {
         if (programacionRepositorio.existsBySalidaExperienciaIdAndServicioExperienciaId(salidaId, servicioId)) {
             throw new ExcepcionReglaNegocio("programacion.duplicada");
         }
     }
 
-    /** Busca una programación activa bajo la salida indicada. */
+    /**
+     * Busca una programación activa bajo la salida indicada.
+     */
     private ProgramacionServicio obtenerProgramacionActiva(Long salidaId, Long id) {
         return programacionRepositorio.findByIdAndSalidaExperienciaIdAndActivoTrue(id, salidaId)
                 .orElseThrow(() -> new ExcepcionReglaNegocio("programacion.no.encontrada"));
     }
 
-    /** Copia el contrato de programación a la entidad y sincroniza cupos iniciales. */
+    /**
+     * Copia el contrato de programación a la entidad y sincroniza cupos iniciales.
+     */
     private void aplicarSolicitud(ProgramacionServicio programacion, ProgramacionServicioRequest solicitud) {
         programacion.setServicioExperienciaId(solicitud.servicioExperienciaId());
         programacion.setPrecioUnitario(solicitud.precioUnitario());
@@ -102,7 +124,9 @@ public class ProgramacionServicioServicio {
         programacion.setCuposDisponibles(solicitud.cuposTotales());
     }
 
-    /** Convierte la entidad persistida al contrato seguro que se expone a la API. */
+    /**
+     * Convierte la entidad persistida al contrato seguro que se expone a la API.
+     */
     private ProgramacionServicioResponse aRespuesta(ProgramacionServicio programacion) {
         return new ProgramacionServicioResponse(programacion.getId(), programacion.getSalidaExperienciaId(),
                 programacion.getServicioExperienciaId(), programacion.getPrecioUnitario(),

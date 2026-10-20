@@ -8,12 +8,12 @@ import jakarta.validation.constraints.Size;
 /**
  * Datos obligatorios que un usuario puede actualizar en su perfil.
  *
- * @param tipoDocumento tipo del documento de identidad.
+ * @param tipoDocumento   tipo del documento de identidad.
  * @param numeroDocumento numero unico del documento de identidad.
- * @param nombres nombres de la persona.
- * @param apellidos apellidos de la persona.
- * @param correo correo electronico unico de contacto.
- * @param telefono telefono movil colombiano unico.
+ * @param nombres         nombres de la persona.
+ * @param apellidos       apellidos de la persona.
+ * @param correo          correo electronico unico de contacto.
+ * @param telefono        telefono movil colombiano unico.
  */
 public record UsuarioActualizacionRequest(
         @NotBlank @Size(max = 20) String tipoDocumento,

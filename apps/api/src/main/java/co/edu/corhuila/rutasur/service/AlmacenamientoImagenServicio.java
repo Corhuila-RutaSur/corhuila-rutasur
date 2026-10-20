@@ -1,5 +1,47 @@
 package co.edu.corhuila.rutasur.service;
-import co.edu.corhuila.rutasur.entity.ExperienciaImagen; import co.edu.corhuila.rutasur.exception.ExcepcionReglaNegocio; import co.edu.corhuila.rutasur.repository.ExperienciaImagenRepositorio; import java.io.IOException; import java.nio.file.*; import java.util.Set; import java.util.UUID; import lombok.RequiredArgsConstructor; import org.springframework.beans.factory.annotation.Value; import org.springframework.stereotype.Service; import org.springframework.web.multipart.MultipartFile;
-/** Guarda imágenes de experiencias fuera del código y persiste solo su ruta pública. */
-@Service @RequiredArgsConstructor public class AlmacenamientoImagenServicio {private static final Set<String> TIPOS=Set.of("image/jpeg","image/png","image/webp");private final ExperienciaImagenRepositorio repositorio;@Value("${app.archivos.directorio:${user.home}/RutaSurUploads}") private String directorio;
- public ExperienciaImagen guardar(Long experienciaId,MultipartFile archivo,boolean principal,int orden){if(archivo.isEmpty()||!TIPOS.contains(archivo.getContentType())||archivo.getSize()>5_000_000)throw new ExcepcionReglaNegocio("imagen.invalida");try{Path carpeta=Paths.get(directorio,"experiencias").toAbsolutePath().normalize();Files.createDirectories(carpeta);String extension=archivo.getOriginalFilename().substring(archivo.getOriginalFilename().lastIndexOf('.'));String nombre=UUID.randomUUID()+extension.toLowerCase();Files.copy(archivo.getInputStream(),carpeta.resolve(nombre),StandardCopyOption.REPLACE_EXISTING);ExperienciaImagen imagen=new ExperienciaImagen();imagen.setExperienciaId(experienciaId);imagen.setUrl("/uploads/experiencias/"+nombre);imagen.setOrden(orden);imagen.setPrincipal(principal);return repositorio.save(imagen);}catch(IOException excepcion){throw new ExcepcionReglaNegocio("imagen.guardado.error");}}}
+
+import co.edu.corhuila.rutasur.entity.ExperienciaImagen;
+import co.edu.corhuila.rutasur.exception.ExcepcionReglaNegocio;
+import co.edu.corhuila.rutasur.repository.ExperienciaImagenRepositorio;
+
+import java.io.IOException;
+import java.nio.file.*;
+import java.util.Set;
+import java.util.UUID;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+/**
+ * Guarda imágenes de experiencias fuera del código y persiste solo su ruta pública.
+ */
+@Service
+@RequiredArgsConstructor
+public class AlmacenamientoImagenServicio {
+    private static final Set<String> TIPOS = Set.of("image/jpeg", "image/png", "image/webp");
+    private final ExperienciaImagenRepositorio repositorio;
+    @Value("${app.archivos.directorio:${user.home}/RutaSurUploads}")
+    private String directorio;
+
+    public ExperienciaImagen guardar(Long experienciaId, MultipartFile archivo, boolean principal, int orden) {
+        if (archivo.isEmpty() || !TIPOS.contains(archivo.getContentType()) || archivo.getSize() > 5_000_000)
+            throw new ExcepcionReglaNegocio("imagen.invalida");
+        try {
+            Path carpeta = Paths.get(directorio, "experiencias").toAbsolutePath().normalize();
+            Files.createDirectories(carpeta);
+            String extension = archivo.getOriginalFilename().substring(archivo.getOriginalFilename().lastIndexOf('.'));
+            String nombre = UUID.randomUUID() + extension.toLowerCase();
+            Files.copy(archivo.getInputStream(), carpeta.resolve(nombre), StandardCopyOption.REPLACE_EXISTING);
+            ExperienciaImagen imagen = new ExperienciaImagen();
+            imagen.setExperienciaId(experienciaId);
+            imagen.setUrl("/uploads/experiencias/" + nombre);
+            imagen.setOrden(orden);
+            imagen.setPrincipal(principal);
+            return repositorio.save(imagen);
+        } catch (IOException excepcion) {
+            throw new ExcepcionReglaNegocio("imagen.guardado.error");
+        }
+    }
+}

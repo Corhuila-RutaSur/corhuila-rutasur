@@ -11,10 +11,12 @@ import co.edu.corhuila.rutasur.mapper.UsuarioMapper;
 import co.edu.corhuila.rutasur.repository.UsuarioRepositorio;
 import co.edu.corhuila.rutasur.repository.TipoUsuarioRepositorio;
 import co.edu.corhuila.rutasur.repository.UsuarioTipoRepositorio;
+
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,7 +60,9 @@ public class UsuarioServicio {
         return usuarioMapper.aRespuesta(usuarioCreado);
     }
 
-    /** Crea una cuenta desde administración con los roles definidos por el administrador. */
+    /**
+     * Crea una cuenta desde administración con los roles definidos por el administrador.
+     */
     @Transactional
     public UsuarioResponse registrarAdministrativo(UsuarioRegistroRequest solicitud, List<String> nombresRoles) {
         log.info("evento=usuario_administrativo_registro_inicio cantidadRoles={}", nombresRoles.size());
@@ -104,7 +108,7 @@ public class UsuarioServicio {
     /**
      * Actualiza los datos de perfil permitidos de una cuenta activa.
      *
-     * @param id identificador tecnico del usuario.
+     * @param id        identificador tecnico del usuario.
      * @param solicitud datos completos y validados de actualizacion.
      * @return usuario actualizado sin datos sensibles.
      * @throws ExcepcionReglaNegocio si no existe el usuario o se repite un dato unico.
@@ -136,7 +140,9 @@ public class UsuarioServicio {
         log.info("evento=usuario_inactivacion_exitosa usuarioId={}", id);
     }
 
-    /** Reemplaza los roles de una cuenta desde el módulo administrativo. */
+    /**
+     * Reemplaza los roles de una cuenta desde el módulo administrativo.
+     */
     @Transactional
     public UsuarioResponse actualizarRoles(Long id, List<String> nombresRoles) {
         log.info("evento=usuario_roles_actualizacion_inicio usuarioId={} cantidadRoles={}", id, nombresRoles.size());
@@ -162,7 +168,7 @@ public class UsuarioServicio {
     /**
      * Comprueba las tres claves de negocio que deben ser exclusivas entre usuarios.
      *
-     * @param usuario datos normalizados que se desean persistir.
+     * @param usuario    datos normalizados que se desean persistir.
      * @param idExcluido identificador a ignorar durante una actualizacion; nulo para registro.
      * @throws ExcepcionReglaNegocio si alguno de los datos ya se encuentra registrado.
      */
@@ -176,7 +182,7 @@ public class UsuarioServicio {
      * Verifica que el documento no este asociado a otra cuenta.
      *
      * @param numeroDocumento documento normalizado.
-     * @param idExcluido usuario que se actualiza, si aplica.
+     * @param idExcluido      usuario que se actualiza, si aplica.
      */
     private void validarNumeroDocumento(String numeroDocumento, Long idExcluido) {
         boolean existe = idExcluido == null
@@ -188,7 +194,7 @@ public class UsuarioServicio {
     /**
      * Verifica que el correo no este asociado a otra cuenta.
      *
-     * @param correo correo normalizado.
+     * @param correo     correo normalizado.
      * @param idExcluido usuario que se actualiza, si aplica.
      */
     private void validarCorreo(String correo, Long idExcluido) {
@@ -201,7 +207,7 @@ public class UsuarioServicio {
     /**
      * Verifica que el telefono no este asociado a otra cuenta.
      *
-     * @param telefono telefono normalizado.
+     * @param telefono   telefono normalizado.
      * @param idExcluido usuario que se actualiza, si aplica.
      */
     private void validarTelefono(String telefono, Long idExcluido) {
@@ -249,7 +255,9 @@ public class UsuarioServicio {
         usuarioTipoRepositorio.save(new UsuarioTipo(usuario, rolCliente));
     }
 
-    /** Valida y asigna la colección de roles de administración a una cuenta. */
+    /**
+     * Valida y asigna la colección de roles de administración a una cuenta.
+     */
     private void asignarRoles(Usuario usuario, List<String> nombresRoles) {
         List<String> rolesNormalizados = nombresRoles.stream().map(nombre -> nombre.trim().toUpperCase(Locale.ROOT)).distinct().toList();
         List<TipoUsuario> roles = tipoUsuarioRepositorio.findByNombreInAndActivoTrue(rolesNormalizados);

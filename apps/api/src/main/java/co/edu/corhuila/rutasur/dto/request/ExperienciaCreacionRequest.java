@@ -5,9 +5,12 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import jakarta.validation.Valid;
+
 import java.util.List;
 
-/** Datos obligatorios para crear una experiencia de catálogo. */
+/**
+ * Datos obligatorios para crear una experiencia de catálogo.
+ */
 public record ExperienciaCreacionRequest(
         @NotNull @Positive Long tipoExperienciaId,
         @NotNull @Positive Long creadoPorUsuarioId,
@@ -15,4 +18,5 @@ public record ExperienciaCreacionRequest(
         @NotBlank String descripcion,
         @NotBlank @Size(max = 150) String destino,
         @Positive Integer duracionHoras,
-        String recomendaciones, @Valid List<ExperienciaImagenRequest> imagenes) { }
+        String recomendaciones, @Valid List<ExperienciaImagenRequest> imagenes) {
+}

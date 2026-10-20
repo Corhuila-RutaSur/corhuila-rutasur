@@ -2,8 +2,10 @@ package co.edu.corhuila.rutasur.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
 import co.edu.corhuila.rutasur.dto.response.RespuestaGeneral;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
+
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -85,10 +87,10 @@ public class ManejadorGlobalExcepciones {
     /**
      * Construye el formato uniforme de error HTTP.
      *
-     * @param estado estado HTTP de salida.
-     * @param codigo clave funcional.
+     * @param estado    estado HTTP de salida.
+     * @param codigo    clave funcional.
      * @param solicitud solicitud HTTP actual.
-     * @param errores detalle opcional por campo.
+     * @param errores   detalle opcional por campo.
      * @return respuesta estructurada de error.
      */
     private <T> ResponseEntity<RespuestaGeneral<T>> construirRespuesta(
@@ -98,7 +100,9 @@ public class ManejadorGlobalExcepciones {
         return ResponseEntity.status(estado).body(respuesta);
     }
 
-    /** Asigna el estado HTTP apropiado sin exponer detalles de seguridad. */
+    /**
+     * Asigna el estado HTTP apropiado sin exponer detalles de seguridad.
+     */
     private HttpStatus resolverEstadoRegla(String codigo) {
         if (codigo.startsWith("autenticacion.")) {
             return HttpStatus.UNAUTHORIZED;

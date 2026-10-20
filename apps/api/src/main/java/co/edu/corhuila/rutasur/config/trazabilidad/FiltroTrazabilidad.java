@@ -4,19 +4,25 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 import java.util.UUID;
+
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-/** Registra una miga de pan segura por solicitud sin exponer cuerpos ni credenciales. */
+/**
+ * Registra una miga de pan segura por solicitud sin exponer cuerpos ni credenciales.
+ */
 @Component
 @Slf4j
 public class FiltroTrazabilidad extends OncePerRequestFilter {
 
-    /** Agrega un identificador correlacionable y registra inicio y cierre de cada solicitud. */
+    /**
+     * Agrega un identificador correlacionable y registra inicio y cierre de cada solicitud.
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest solicitud, HttpServletResponse respuesta, FilterChain cadena)
             throws ServletException, IOException {

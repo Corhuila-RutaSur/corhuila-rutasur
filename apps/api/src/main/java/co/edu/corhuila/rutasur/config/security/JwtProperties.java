@@ -1,8 +1,15 @@
 package co.edu.corhuila.rutasur.config.security;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
-/** Propiedades externas de emisión de tokens JWT. */
-@Validated @ConfigurationProperties(prefix = "app.security.jwt")
-public record JwtProperties(@NotBlank String secret, @Positive long accessTokenMinutos, @Positive long refreshTokenMinutos) { }
+
+/**
+ * Propiedades externas de emisión de tokens JWT.
+ */
+@Validated
+@ConfigurationProperties(prefix = "app.security.jwt")
+public record JwtProperties(@NotBlank String secret, @Positive long accessTokenMinutos,
+                            @Positive long refreshTokenMinutos) {
+}

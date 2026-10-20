@@ -2,16 +2,21 @@ package co.edu.corhuila.rutasur.repository;
 
 import co.edu.corhuila.rutasur.entity.EstadoReserva;
 import co.edu.corhuila.rutasur.entity.Reserva;
+
 import java.util.List;
 import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-/** Repositorio de cabeceras de reserva y de disponibilidad transaccional. */
+/**
+ * Repositorio de cabeceras de reserva y de disponibilidad transaccional.
+ */
 public interface ReservaRepositorio extends JpaRepository<Reserva, Long> {
     Optional<Reserva> findByIdAndEstadoNot(Long id, EstadoReserva estado);
+
     List<Reserva> findByUsuarioIdOrderByFechaReservaDesc(Long usuarioId);
 
     @Query(value = "select id, cupos_disponibles as \"cuposDisponibles\", estado::text as estado "

@@ -10,7 +10,9 @@ import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
-/** Envuelve las respuestas exitosas de los controladores en el contrato publico de RutaSur. */
+/**
+ * Envuelve las respuestas exitosas de los controladores en el contrato publico de RutaSur.
+ */
 @RestControllerAdvice(basePackages = "co.edu.corhuila.rutasur.controller")
 public class EnvoltorioRespuestaApi implements ResponseBodyAdvice<Object> {
 
@@ -27,7 +29,7 @@ public class EnvoltorioRespuestaApi implements ResponseBodyAdvice<Object> {
 
     @Override
     public Object beforeBodyWrite(Object cuerpo, MethodParameter tipoRetorno, MediaType tipoContenido,
-            Class converterType, ServerHttpRequest solicitud, ServerHttpResponse respuesta) {
+                                  Class converterType, ServerHttpRequest solicitud, ServerHttpResponse respuesta) {
         if (cuerpo instanceof RespuestaGeneral<?>) {
             return cuerpo;
         }
