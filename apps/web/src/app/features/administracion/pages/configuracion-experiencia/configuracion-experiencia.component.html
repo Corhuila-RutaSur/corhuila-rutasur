@@ -21,12 +21,9 @@
     <div class="titulo-panel"><span class="paso">2</span><div><h2 id="titulo-salidas">Salidas y cupos</h2><p>Una salida es una fecha concreta para realizar esta experiencia.</p></div></div>
     <div class="formulario-grid cuatro-columnas">
       <label><span>Fecha y hora de inicio <b>*</b></span><input type="datetime-local" [(ngModel)]="salida.fechaHoraInicio" name="fechaHoraInicio"/></label>
-      <label><span>Fecha y hora de finalización</span><input type="datetime-local" [(ngModel)]="salida.fechaHoraFin" name="fechaHoraFin"/></label>
       <label><span>Cupos totales <b>*</b></span><input type="number" min="1" [(ngModel)]="salida.cuposTotales" name="cuposTotales"/><small>Personas que pueden asistir.</small></label>
-      <label><span>Estado inicial <b>*</b></span><select [(ngModel)]="salida.estado" name="estadoSalida"><option value="PROGRAMADA">Programada</option><option value="ABIERTA">Abierta a reservas</option></select></label>
     </div>
-    <label class="campo-completo"><span>Observaciones</span><textarea [(ngModel)]="salida.observaciones" name="observacionesSalida" rows="3" placeholder="Información operativa visible solo al equipo administrador"></textarea></label>
-    <div class="acciones"><button class="boton primario" type="button" (click)="crearSalida()">Crear salida</button></div>
+    <div class="acciones"><button class="boton primario" type="button" [disabled]="guardandoSalida()" (click)="crearSalida()">{{ guardandoSalida() ? 'Creando salida…' : 'Crear salida' }}</button></div>
     @if (salidas().length) { <div class="salidas">@for (item of salidas(); track item.id) { <button class="salida" type="button" [class.activa]="salidaSeleccionada() === item.id" (click)="seleccionarSalida(item.id)"><strong>{{ item.fechaHoraInicio | date:'dd/MM/yyyy, h:mm a' }}</strong><span>{{ item.estado }} · {{ item.cuposDisponibles }} de {{ item.cuposTotales }} cupos disponibles</span></button> }</div> } @else { <p class="vacio">Crea la primera salida para continuar con la programación de servicios.</p> }
   </section>
 
@@ -36,9 +33,9 @@
       <div class="formulario-grid tres-columnas">
         <label><span>Servicio <b>*</b></span><select [(ngModel)]="servicioProgramado" name="servicioProgramado"><option [ngValue]="null">Selecciona un servicio</option>@for (item of servicios(); track item.id) { <option [ngValue]="item.id">{{ item.nombre }} · {{ item.tipo }}</option> }</select></label>
         <label><span>Precio por persona (COP) <b>*</b></span><input type="number" min="0" [(ngModel)]="precio" name="precioServicio" placeholder="0"/></label>
-        <label><span>Cupos para este servicio</span><input type="number" min="1" [(ngModel)]="cupos" name="cuposServicio" placeholder="Usar cupos generales"/><small>Déjalo vacío para usar los cupos de la salida.</small></label>
+        <label><span>Cupos para este servicio <b>*</b></span><input type="number" min="1" [(ngModel)]="cupos" name="cuposServicio"/><small>Capacidad propia de este servicio en la salida.</small></label>
       </div>
-      <div class="acciones"><button class="boton primario" type="button" (click)="programar()">Guardar programación</button></div>
+      <div class="acciones"><button class="boton primario" type="button" [disabled]="guardandoProgramacion()" (click)="programar()">{{ guardandoProgramacion() ? 'Guardando…' : 'Guardar programación' }}</button></div>
     </section>
   }
 </main>

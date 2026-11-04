@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: rutasur-operacion
+  datasource:
+    url: ${OPERACION_DB_URL:jdbc:postgresql://localhost:5433/rutasur_operacion_db}
+    username: ${OPERACION_DB_USERNAME:postgres}
+    password: ${OPERACION_DB_PASSWORD:postgres}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+
+server:
+  port: ${OPERACION_PORT:8095}
+
+app:
+  mensajeria:
+    endpoint: ${AWS_ENDPOINT_URL:http://localhost:4566}
+    region: ${AWS_REGION:us-east-1}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+scalar:
+  enabled: true
+  url: /v3/api-docs

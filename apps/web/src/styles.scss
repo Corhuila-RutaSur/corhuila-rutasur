@@ -38,11 +38,34 @@ body {
 }
 
 :root {
-  --rs-color-error: #b3261e;
+  /* Natura / RutaSur: identidad visual de turismo confiable y premium. */
+  --rs-primary: #287a50;
+  --rs-primary-hover: #174b35;
+  --rs-primary-light: #eaf4ed;
+  --rs-primary-soft: #c8e3d0;
+  --rs-primary-accent: #79b88c;
+  --rs-fondo: #f8faf8;
+  --rs-superficie: #ffffff;
+  --rs-superficie-secundaria: #eaf4ed;
+  --rs-texto-principal: #26352d;
+  --rs-texto-secundario: #718078;
+  --rs-texto-suave: #9aa79e;
+  --rs-borde: #e2eae4;
+  --rs-borde-focus: #287a50;
+  --rs-color-exito: #287a50;
+  --rs-color-advertencia: #d99a35;
+  --rs-color-error: #d9534f;
+  --rs-color-info: #6b91a1;
   --rs-espacio-3: 1rem;
   --rs-radio-sm: 0.5rem;
   --rs-radio-md: 0.75rem;
-  --rs-sombra-suave: 0 2px 8px rgb(0 0 0 / 12%);
+  --rs-radio-lg: 0.75rem;
+  --rs-sombra-suave: 0 4px 16px rgb(23 75 53 / 7%);
+}
+
+body {
+  background-color: var(--rs-fondo);
+  color: var(--rs-texto-principal);
 }
 
 .rs-contenedor-toastr.mat-mdc-snack-bar-container {

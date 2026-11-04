@@ -1,23 +1,30 @@
-# Especificaciones funcionales
+# Especificaciones funcionales V2
 
-Las especificaciones son la fuente de verdad funcional de RutaSur: describen qué debe hacer el sistema, sus reglas y cómo comprobarlas. No imponen detalles internos de código salvo que sean parte de un contrato o una restricción explícita.
+Los specs son la fuente de verdad funcional para el desarrollo de V2. Definen qué problema se resuelve, quién puede usarlo, reglas, límites, escenarios y criterios de aceptación; no reemplazan el código, OpenAPI, migraciones ni ADR. Consulta también la [trazabilidad V1 → V2](trazabilidad-v1-v2.md).
 
-## Especificaciones V1
+## Ciclo de trabajo
 
-| Documento | Alcance |
-| --- | --- |
-| [001-glosario-del-dominio](001-glosario-del-dominio.md) | Lenguaje común del dominio turístico. |
-| [002-gestion-de-experiencias](002-gestion-de-experiencias.md) | Catálogo de experiencias, imágenes y servicios. |
-| [003-gestion-de-salidas](003-gestion-de-salidas.md) | Fechas, cupos, precios y disponibilidad. |
-| [004-reservas](004-reservas.md) | Compra configurable, participantes y asistencia. |
-| [005-pagos](005-pagos.md) | Registro y efecto de pagos y reembolsos. |
-| [006-operacion-y-asistencia](006-operacion-y-asistencia.md) | Ejecución, guía, conductor, vehículo y asistencia. |
-| [007-calificaciones](007-calificaciones.md) | Evaluación posterior de una reserva finalizada. |
-| [008-autorizacion-y-roles](008-autorizacion-y-roles.md) | Permisos por rol en la V1. |
-| [009-reglas-de-negocio](009-reglas-de-negocio.md) | Reglas transversales consolidadas. |
-| [010-estados-del-dominio](010-estados-del-dominio.md) | Estados y transiciones permitidas. |
-| [011-autenticacion-y-sesiones](011-autenticacion-y-sesiones.md) | Acceso público, JWT, sesiones, refresh tokens y revocación. |
-| [012-gobierno-documentacion](012-gobierno-documentacion.md) | Actualización obligatoria de README, specs, modelo, API y Wiki. |
-| [013-gestion-de-usuarios](013-gestion-de-usuarios.md) | Registro, perfil, unicidad de datos e inactivación lógica de usuarios. |
+1. Crear un spec a partir de [la plantilla](plantilla-spec.md).
+2. Relacionarlo con el ADR, diagramas, datos, endpoints y eventos que afecte.
+3. Revisar y acordar reglas y criterios de aceptación antes de implementar.
+4. Implementar y probar contra esos criterios.
+5. Actualizar el spec si cambia el comportamiento; no dejar la documentación para después.
 
-Para crear una nueva funcionalidad, utiliza `plantilla-spec.md` y el siguiente número consecutivo.
+## Backlog vigente y dueño
+
+| Estado | Spec propuesto | Servicio dueño |
+| --- | --- | --- |
+| Implementado parcialmente | 001 — Lenguaje ubicuo y límites de contexto | Todos |
+| Implementado parcialmente | [002 — Identidad, autorización y sesiones](002-identidad-autorizacion-y-sesiones.md) | Identidad |
+| Implementado parcialmente | [003 — Catálogo de experiencias](003-catalogo-de-experiencias.md) | Catálogo |
+| Implementado parcialmente | 004 — Salidas y disponibilidad | Reservas |
+| Implementado parcialmente | [005 — Reservas, cupos y Saga](005-reservas-cupos-y-saga.md) | Reservas |
+| Implementado parcialmente | [006 — Pagos, reembolsos y Saga](006-pagos-reembolsos-y-saga.md) | Pagos |
+| Pendiente | 007 — Operación y asistencia | Operación |
+| Pendiente | 008 — Calificaciones | Reservas / Consultas |
+| En implementación | [009 — Proyecciones de consulta](009-proyecciones-de-consulta.md) | Consultas |
+| Implementado parcialmente | 010 — Estados e invariantes | Todos |
+| Implementado parcialmente | 011 — Gobierno y trazabilidad | Todos |
+| Pendiente crítico | [013 — Seguridad de borde y autorización distribuida](013-seguridad-de-borde-y-autorizacion-distribuida.md) | Gateway / Identidad / todos |
+
+La especificación de Identidad es el punto de partida de la extracción. Su primera migración aún no fue aplicada, por lo que puede alinearse con este documento antes del primer arranque del servicio.

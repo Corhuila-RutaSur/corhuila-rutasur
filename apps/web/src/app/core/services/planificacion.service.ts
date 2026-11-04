@@ -1,60 +1,38 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { URL_API } from '../config/api.config';
-import { ProgramacionServicio, SalidaExperiencia, ServicioExperiencia } from '../models/planificacion.model';
+import { API_V2 } from '../config/api.config';
+import { ProgramacionServicio, ProgramacionServicioSolicitud, SalidaCreacionSolicitud, SalidaExperiencia, ServicioExperiencia } from '../models/planificacion.model';
 import { RespuestaGeneral } from '../models/respuesta-general.model';
 
-/** Centraliza el acceso HTTP a servicios, salidas y precios de las experiencias. */
+/** Orquesta los comandos V2 de Catálogo y Reservas para configurar una experiencia. */
 @Injectable({ providedIn: 'root' })
 export class PlanificacionService {
   private readonly http = inject(HttpClient);
-  private readonly url = inject(URL_API);
+  private readonly api = inject(API_V2);
 
-  /** Obtiene los servicios activos que un visitante puede consultar. */
-  serviciosPublicos(id: number): Observable<RespuestaGeneral<ServicioExperiencia[]>> {
-    return this.http.get<RespuestaGeneral<ServicioExperiencia[]>>(`${this.url}/public/experiencias/${id}/servicios`);
+  /** Lista servicios comerciales activos desde el dueño Catálogo. */
+  servicios(experienciaId: string): Observable<RespuestaGeneral<ServicioExperiencia[]>> {
+    return this.http.get<RespuestaGeneral<ServicioExperiencia[]>>(`${this.api.catalogo}/administracion/experiencias/${experienciaId}/servicios`);
   }
 
-  /** Obtiene las salidas abiertas que se pueden reservar. */
-  salidasPublicas(id: number): Observable<RespuestaGeneral<SalidaExperiencia[]>> {
-    return this.http.get<RespuestaGeneral<SalidaExperiencia[]>>(`${this.url}/public/experiencias/${id}/salidas`);
+  /** Crea un servicio en el catálogo de una experiencia. */
+  crearServicio(experienciaId: string, datos: Pick<ServicioExperiencia, 'tipo' | 'nombre' | 'descripcion'>): Observable<RespuestaGeneral<ServicioExperiencia>> {
+    return this.http.post<RespuestaGeneral<ServicioExperiencia>>(`${this.api.catalogo}/administracion/experiencias/${experienciaId}/servicios`, datos);
   }
 
-  salidaPublica(id: number): Observable<RespuestaGeneral<SalidaExperiencia>> { return this.http.get<RespuestaGeneral<SalidaExperiencia>>(`${this.url}/public/salidas/${id}`); }
-
-  /** Obtiene los servicios con precio de una salida pública concreta. */
-  programacionesPublicas(id: number): Observable<RespuestaGeneral<ProgramacionServicio[]>> {
-    return this.http.get<RespuestaGeneral<ProgramacionServicio[]>>(`${this.url}/public/salidas/${id}/programaciones`);
+  /** Consulta las salidas administradas por Reservas; la pantalla filtra su experiencia. */
+  salidas(): Observable<RespuestaGeneral<SalidaExperiencia[]>> {
+    return this.http.get<RespuestaGeneral<SalidaExperiencia[]>>(`${this.api.reservas}/administracion/salidas`);
   }
 
-  /** Obtiene los servicios para la configuración administrativa. */
-  servicios(id: number): Observable<RespuestaGeneral<ServicioExperiencia[]>> {
-    return this.serviciosPublicos(id);
+  /** Registra la fecha y capacidad de una salida en Reservas. */
+  crearSalida(datos: SalidaCreacionSolicitud): Observable<RespuestaGeneral<SalidaExperiencia>> {
+    return this.http.post<RespuestaGeneral<SalidaExperiencia>>(`${this.api.reservas}/administracion/salidas`, datos);
   }
 
-  /** Crea un servicio dentro de una experiencia. */
-  crearServicio(id: number, datos: Partial<ServicioExperiencia>): Observable<RespuestaGeneral<ServicioExperiencia>> {
-    return this.http.post<RespuestaGeneral<ServicioExperiencia>>(`${this.url}/experiencias/${id}/servicios`, datos);
-  }
-
-  /** Obtiene todas las salidas de una experiencia para administración. */
-  salidas(id: number): Observable<RespuestaGeneral<SalidaExperiencia[]>> {
-    return this.http.get<RespuestaGeneral<SalidaExperiencia[]>>(`${this.url}/experiencias/${id}/salidas`);
-  }
-
-  /** Crea una salida administrativa. */
-  crearSalida(id: number, datos: Partial<SalidaExperiencia>): Observable<RespuestaGeneral<SalidaExperiencia>> {
-    return this.http.post<RespuestaGeneral<SalidaExperiencia>>(`${this.url}/experiencias/${id}/salidas`, datos);
-  }
-
-  /** Obtiene precios y cupos de servicios para una salida administrativa. */
-  programaciones(id: number): Observable<RespuestaGeneral<ProgramacionServicio[]>> {
-    return this.http.get<RespuestaGeneral<ProgramacionServicio[]>>(`${this.url}/salidas/${id}/programaciones`);
-  }
-
-  /** Programa un servicio dentro de una salida. */
-  crearProgramacion(id: number, datos: Partial<ProgramacionServicio>): Observable<RespuestaGeneral<ProgramacionServicio>> {
-    return this.http.post<RespuestaGeneral<ProgramacionServicio>>(`${this.url}/salidas/${id}/programaciones`, datos);
+  /** Habilita un servicio de Catálogo para la salida con precio y cupos propios. */
+  crearProgramacion(salidaId: string, datos: ProgramacionServicioSolicitud): Observable<RespuestaGeneral<ProgramacionServicio>> {
+    return this.http.post<RespuestaGeneral<ProgramacionServicio>>(`${this.api.reservas}/administracion/salidas/${salidaId}/servicios`, datos);
   }
 }

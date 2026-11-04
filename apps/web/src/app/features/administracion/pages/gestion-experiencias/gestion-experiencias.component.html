@@ -1,1 +1,21 @@
-<main class="gestion"><a routerLink="/administracion">← Panel administrativo</a><header><p>CATÁLOGO</p><h1>Experiencias</h1></header><section class="formulario"><h2>Nueva experiencia</h2><label>Tipo<select [(ngModel)]="formulario.tipoExperienciaId"><option [ngValue]="1">Astroturismo</option><option [ngValue]="2">Aventura</option><option [ngValue]="3">Naturaleza</option><option [ngValue]="4">Cultural</option><option [ngValue]="5">Gastronómica</option><option [ngValue]="6">Bienestar</option><option [ngValue]="7">Rural / Agroturismo</option><option [ngValue]="8">Evento especial</option></select></label><label>Nombre<input [(ngModel)]="formulario.nombre"/></label><label>Destino<input [(ngModel)]="formulario.destino"/></label><label>Duración en horas<input type="number" min="1" [(ngModel)]="formulario.duracionHoras"/></label><label class="amplio">Descripción<textarea [(ngModel)]="formulario.descripcion"></textarea></label><label class="amplio">Recomendaciones<textarea [(ngModel)]="formulario.recomendaciones"></textarea></label><label class="amplio">Imágenes<input type="file" accept="image/jpeg,image/png,image/webp" multiple (change)="seleccionarArchivos($event)"/></label><button type="button" [disabled]="guardando()" (click)="crear()">{{guardando()?'Guardando…':'Crear experiencia'}}</button></section><section class="listado"><h2>Experiencias activas</h2>@for(experiencia of experiencias();track experiencia.id){<article><img [src]="experiencia.imagenes[0]?.url ? 'http://localhost:8090' + experiencia.imagenes[0].url : '/assets/mascota/tati-bienvenida.png'" [alt]="experiencia.nombre"/><div><strong>{{experiencia.nombre}}</strong><span>{{experiencia.destino}}</span><p>{{experiencia.descripcion}}</p></div><div class="acciones"><a class="boton-configurar" [routerLink]="['/administracion/experiencias',experiencia.id,'configuracion']">Configurar servicios y salidas</a><button type="button" (click)="inactivar(experiencia.id)">Inactivar</button></div></article>}@empty{<p>Aún no hay experiencias creadas.</p>}</section></main>
+<main class="gestion">
+  <a routerLink="/administracion">← Panel administrativo</a>
+  <header><p>CATÁLOGO V2</p><h1>Experiencias</h1></header>
+  <section class="formulario">
+    <h2>Nueva experiencia</h2>
+    <label>Tipo de experiencia<select [(ngModel)]="formulario.tipoExperienciaId"><option value="" disabled>Selecciona un tipo</option>@for (tipo of tipos(); track tipo.id) { <option [value]="tipo.id">{{ tipo.nombre }}</option> }</select></label>
+    <label>Nombre<input [(ngModel)]="formulario.nombre" /></label>
+    <label>Destino<input [(ngModel)]="formulario.destino" /></label>
+    <label>Duración en horas<input type="number" min="1" [(ngModel)]="formulario.duracionHoras" /></label>
+    <label class="amplio">Descripción<textarea [(ngModel)]="formulario.descripcion"></textarea></label>
+    <label class="amplio">Recomendaciones<textarea [(ngModel)]="formulario.recomendaciones"></textarea></label>
+    <label class="amplio">Imágenes<input type="file" accept="image/jpeg,image/png,image/webp" multiple (change)="seleccionarArchivos($event)" /></label>
+    <button type="button" [disabled]="guardando()" (click)="crear()">{{ guardando() ? 'Guardando…' : 'Crear experiencia' }}</button>
+  </section>
+  <section class="listado">
+    <h2>Experiencias activas</h2>
+    @for (experiencia of experiencias(); track experiencia.id) {
+      <article><img [src]="urlImagen(experiencia.imagenPrincipal)" [alt]="experiencia.nombre" /><div><strong>{{ experiencia.nombre }}</strong><span>{{ experiencia.destino }}</span><p>{{ experiencia.descripcion }}</p></div><div class="acciones"><a class="boton-configurar" [routerLink]="['/administracion/experiencias', experiencia.id, 'configuracion']">Configurar servicios y salidas</a><button type="button" (click)="inactivar(experiencia.id)">Inactivar</button></div></article>
+    } @empty { <p>Aún no hay experiencias creadas.</p> }
+  </section>
+</main>

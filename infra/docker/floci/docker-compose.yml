@@ -1,0 +1,21 @@
+services:
+  floci:
+    image: floci/floci:latest
+    container_name: rutasur-floci
+    ports:
+      - "4566:4566"
+    volumes:
+      - rutasur-floci-data:/app/data
+
+  floci-ui:
+    image: floci/floci-ui:latest
+    container_name: rutasur-floci-ui
+    depends_on:
+      - floci
+    environment:
+      FLOCI_ENDPOINT: http://floci:4566
+    ports:
+      - "4500:4500"
+
+volumes:
+  rutasur-floci-data:

@@ -1,8 +1,14 @@
-# [Número] — [Nombre de la funcionalidad]
+# [Número] — [Nombre de la capacidad]
 
-## Objetivo
+**Estado:** Borrador | En revisión | Aprobada | Implementada
 
-Describe el problema, el usuario que lo tiene y el resultado esperado.
+**Servicio dueño:** [nombre]
+**Decisiones relacionadas:** [ADR, diagrama o spec vinculada]
+**Origen V1:** [spec, módulo o regla de la que procede; `No aplica` si es nueva]
+
+## Objetivo y valor
+
+Describe el problema, el actor y el resultado de negocio esperado.
 
 ## Alcance
 
@@ -12,9 +18,9 @@ Describe el problema, el usuario que lo tiene y el resultado esperado.
 
 -
 
-## Actores y permisos
+## Actores y autorización
 
-| Actor | Puede hacer |
+| Actor o servicio | Permiso o responsabilidad |
 | --- | --- |
 | | |
 
@@ -22,15 +28,40 @@ Describe el problema, el usuario que lo tiene y el resultado esperado.
 
 1.
 
-## Flujos y casos alternativos
-
-### Flujo exitoso
+## Flujo principal
 
 1.
 
-### Errores y casos límite
+## Casos alternativos y errores
 
 -
+
+## Contratos afectados
+
+### HTTP
+
+| Método y ruta | Resultado esperado |
+| --- | --- |
+| | |
+
+### Eventos
+
+| Produce o consume | Evento | Acción |
+| --- | --- | --- |
+| | | |
+
+### Datos y migraciones
+
+- Tablas o proyecciones:
+- Datos externos/snapshots:
+- Migración Flyway prevista:
+
+## Trazabilidad de migración
+
+- Regla V1 preservada o cambio explícito:
+- Comando, consulta o proyección:
+- Estrategia de consistencia: ACID local | evento idempotente | Saga compensable:
+- CorrelationId y eventos afectados:
 
 ## Criterios de aceptación
 
@@ -44,9 +75,18 @@ Entonces ...
 ## Requisitos no funcionales
 
 - Seguridad:
-- Rendimiento:
-- Accesibilidad:
+- Consistencia:
 - Observabilidad:
+- Rendimiento:
+- Accesibilidad, cuando aplique:
+
+## Pruebas requeridas
+
+- Unitarias de dominio:
+- Aplicación:
+- Adaptadores o integración:
+- Arquitectura:
+- Contrato HTTP o de evento:
 
 ## Preguntas abiertas y supuestos
 

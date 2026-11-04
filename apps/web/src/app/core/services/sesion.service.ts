@@ -8,6 +8,6 @@ const LLAVE_SESION = 'rutasur.sesion';
   accessToken(): string | null { return this.estadoInterno()?.accessToken ?? null; }
   refreshToken(): string | null { return this.estadoInterno()?.refreshToken ?? null; }
   tieneRol(rol: string): boolean { return this.estadoInterno()?.roles.includes(rol) ?? false; }
-  usuarioId(): number | null { try { const token = this.accessToken(); if (!token) return null; const carga = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'); return Number(JSON.parse(atob(carga)).sub) || null; } catch { return null; } }
+  usuarioId(): string | null { try { const token = this.accessToken(); if (!token) return null; const carga = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'); const sujeto = JSON.parse(atob(carga)).sub; return typeof sujeto === 'string' && sujeto.length ? sujeto : null; } catch { return null; } }
   private leer(): TokensSesion | null { const valor = sessionStorage.getItem(LLAVE_SESION); if (!valor) return null; try { return JSON.parse(valor) as TokensSesion; } catch { this.cerrar(); return null; } }
 }

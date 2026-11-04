@@ -1,0 +1,435 @@
+// RutaSur V2 - Modelo lógico por microservicio.
+// Pegar este archivo en dbdiagram.io para inspeccionar los modelos.
+// Las referencias se limitan a cada base de datos; nunca cruzan dominios.
+
+Enum identidad.estado_sesion { ACTIVA INVALIDADA EXPIRADA }
+Enum reservas.estado_salida { PROGRAMADA ABIERTA CERRADA EN_EJECUCION FINALIZADA CANCELADA }
+Enum reservas.estado_bloqueo { ACTIVO CONFIRMADO EXPIRADO LIBERADO }
+Enum reservas.estado_reserva { PENDIENTE_PAGO CONFIRMADA CANCELADA FINALIZADA }
+Enum reservas.estado_asistencia { PENDIENTE ASISTIO NO_ASISTIO CANCELADO }
+Enum pagos.estado_pago { PENDIENTE APROBADO RECHAZADO REEMBOLSADO }
+Enum operacion.estado_ejecucion { PENDIENTE EN_CURSO FINALIZADA CANCELADA }
+Enum notificaciones.estado_notificacion { PENDIENTE ENVIADA FALLIDA }
+
+Table identidad.usuario {
+  id uuid [pk]
+  tipo_documento varchar(20) [not null]
+  numero_documento varchar(30) [not null, unique]
+  nombres varchar(100) [not null]
+  apellidos varchar(100) [not null]
+  correo varchar(150) [not null, unique]
+  telefono varchar(30) [not null, unique]
+  password_hash varchar(255) [not null]
+  activo boolean [not null, default: true]
+  creado_en timestamptz [not null]
+  actualizado_en timestamptz
+}
+
+Table identidad.rol {
+  id uuid [pk]
+  nombre varchar(50) [not null, unique]
+  descripcion varchar(255)
+  activo boolean [not null, default: true]
+}
+
+Table identidad.usuario_rol {
+  usuario_id uuid [not null]
+  rol_id uuid [not null]
+  asignado_en timestamptz [not null]
+  indexes { (usuario_id, rol_id) [pk] }
+}
+
+Table identidad.sesion_autenticacion {
+  id uuid [pk]
+  usuario_id uuid [not null]
+  estado identidad.estado_sesion [not null]
+  ip_origen varchar(45)
+  agente_usuario varchar(500)
+  iniciada_en timestamptz [not null]
+  expira_en timestamptz [not null]
+  invalidada_en timestamptz
+}
+
+Table identidad.refresh_token {
+  id uuid [pk]
+  sesion_id uuid [not null]
+  token_hash varchar(255) [not null, unique]
+  usado boolean [not null, default: false]
+  expira_en timestamptz [not null]
+  creado_en timestamptz [not null]
+}
+
+Table identidad.access_token_revocado {
+  id uuid [pk]
+  sesion_id uuid [not null]
+  jti varchar(100) [not null, unique]
+  expira_en timestamptz [not null]
+  revocado_en timestamptz [not null]
+}
+
+Table identidad.evento_autenticacion {
+  id uuid [pk]
+  usuario_id uuid
+  tipo varchar(80) [not null]
+  detalle jsonb
+  ocurrido_en timestamptz [not null]
+}
+
+Ref: identidad.usuario_rol.usuario_id > identidad.usuario.id
+Ref: identidad.usuario_rol.rol_id > identidad.rol.id
+Ref: identidad.sesion_autenticacion.usuario_id > identidad.usuario.id
+Ref: identidad.refresh_token.sesion_id > identidad.sesion_autenticacion.id
+Ref: identidad.access_token_revocado.sesion_id > identidad.sesion_autenticacion.id
+
+Table catalogo.tipo_experiencia {
+  id uuid [pk]
+  nombre varchar(80) [not null, unique]
+  descripcion varchar(255)
+  activo boolean [not null, default: true]
+}
+
+Table catalogo.experiencia {
+  id uuid [pk]
+  tipo_experiencia_id uuid [not null]
+  creador_id_externo uuid [not null]
+  nombre varchar(150) [not null]
+  descripcion text [not null]
+  destino varchar(150) [not null]
+  duracion_horas int
+  recomendaciones text
+  activa boolean [not null, default: true]
+  creado_en timestamptz [not null]
+  actualizado_en timestamptz
+}
+
+Table catalogo.experiencia_imagen {
+  id uuid [pk]
+  experiencia_id uuid [not null]
+  url varchar(500) [not null]
+  descripcion varchar(255)
+  orden int [not null]
+  principal boolean [not null, default: false]
+}
+
+Table catalogo.servicio_experiencia {
+  id uuid [pk]
+  experiencia_id uuid [not null]
+  tipo varchar(40) [not null]
+  nombre varchar(150) [not null]
+  descripcion text
+  activo boolean [not null, default: true]
+  indexes { (experiencia_id, nombre) [unique] }
+}
+
+Table catalogo.resumen_calificacion {
+  experiencia_id uuid [pk]
+  puntuacion_promedio decimal(3,2) [not null, default: 0]
+  cantidad_calificaciones int [not null, default: 0]
+  actualizado_en timestamptz [not null]
+}
+
+Ref: catalogo.experiencia.tipo_experiencia_id > catalogo.tipo_experiencia.id
+Ref: catalogo.experiencia_imagen.experiencia_id > catalogo.experiencia.id
+Ref: catalogo.servicio_experiencia.experiencia_id > catalogo.experiencia.id
+Ref: catalogo.resumen_calificacion.experiencia_id - catalogo.experiencia.id
+
+Table reservas.experiencia_disponible {
+  id uuid [pk]
+  experiencia_catalogo_id uuid [not null, unique]
+  nombre_snapshot varchar(150) [not null]
+  destino_snapshot varchar(150) [not null]
+  activa boolean [not null]
+  version_evento bigint [not null]
+  actualizado_en timestamptz [not null]
+}
+
+Table reservas.servicio_disponible {
+  id uuid [pk]
+  servicio_catalogo_id uuid [not null, unique]
+  experiencia_disponible_id uuid [not null]
+  nombre_snapshot varchar(150) [not null]
+  tipo_snapshot varchar(40) [not null]
+  activo boolean [not null]
+  version_evento bigint [not null]
+}
+
+Table reservas.salida_experiencia {
+  id uuid [pk]
+  experiencia_disponible_id uuid [not null]
+  fecha_hora_inicio timestamptz [not null]
+  fecha_hora_fin timestamptz
+  cupos_totales int [not null]
+  cupos_disponibles int [not null]
+  estado reservas.estado_salida [not null]
+  observaciones text
+  creado_en timestamptz [not null]
+}
+
+Table reservas.programacion_servicio {
+  id uuid [pk]
+  salida_id uuid [not null]
+  servicio_disponible_id uuid [not null]
+  precio_unitario decimal(12,2) [not null]
+  cupos_totales int
+  cupos_disponibles int
+  activo boolean [not null, default: true]
+  indexes { (salida_id, servicio_disponible_id) [unique] }
+}
+
+Table reservas.bloqueo_cupo {
+  id uuid [pk]
+  codigo varchar(30) [not null, unique]
+  salida_id uuid [not null]
+  cliente_id_externo uuid [not null]
+  cantidad_participantes int [not null]
+  estado reservas.estado_bloqueo [not null]
+  vence_en timestamptz [not null]
+  creado_en timestamptz [not null]
+  actualizado_en timestamptz
+}
+
+Table reservas.bloqueo_servicio {
+  id uuid [pk]
+  bloqueo_cupo_id uuid [not null]
+  programacion_servicio_id uuid [not null]
+  cantidad int [not null]
+  precio_unitario_snapshot decimal(12,2) [not null]
+  indexes { (bloqueo_cupo_id, programacion_servicio_id) [unique] }
+}
+
+Table reservas.reserva {
+  id uuid [pk]
+  codigo varchar(30) [not null, unique]
+  bloqueo_cupo_id uuid [not null, unique]
+  cliente_id_externo uuid [not null]
+  estado reservas.estado_reserva [not null]
+  subtotal decimal(12,2) [not null]
+  descuento decimal(12,2) [not null, default: 0]
+  total decimal(12,2) [not null]
+  fecha_reserva timestamptz [not null]
+  observaciones text
+}
+
+Table reservas.participante_reserva {
+  id uuid [pk]
+  reserva_id uuid [not null]
+  tipo_documento varchar(20)
+  numero_documento varchar(30)
+  nombres varchar(100) [not null]
+  apellidos varchar(100) [not null]
+  telefono varchar(30)
+  correo varchar(150)
+  responsable boolean [not null, default: false]
+}
+
+Table reservas.detalle_reserva {
+  id uuid [pk]
+  reserva_id uuid [not null]
+  programacion_servicio_id uuid [not null]
+  servicio_nombre_snapshot varchar(150) [not null]
+  cantidad int [not null]
+  precio_unitario decimal(12,2) [not null]
+  subtotal decimal(12,2) [not null]
+  indexes { (reserva_id, programacion_servicio_id) [unique] }
+}
+
+Table reservas.detalle_participante {
+  id uuid [pk]
+  detalle_reserva_id uuid [not null]
+  participante_reserva_id uuid [not null]
+  asistencia reservas.estado_asistencia [not null]
+  indexes { (detalle_reserva_id, participante_reserva_id) [unique] }
+}
+
+Table reservas.calificacion {
+  id uuid [pk]
+  reserva_id uuid [not null, unique]
+  experiencia_catalogo_id_externo uuid [not null]
+  puntuacion int [not null]
+  comentario varchar(1000)
+  fecha_calificacion timestamptz [not null]
+}
+
+Ref: reservas.servicio_disponible.experiencia_disponible_id > reservas.experiencia_disponible.id
+Ref: reservas.salida_experiencia.experiencia_disponible_id > reservas.experiencia_disponible.id
+Ref: reservas.programacion_servicio.salida_id > reservas.salida_experiencia.id
+Ref: reservas.programacion_servicio.servicio_disponible_id > reservas.servicio_disponible.id
+Ref: reservas.bloqueo_cupo.salida_id > reservas.salida_experiencia.id
+Ref: reservas.bloqueo_servicio.bloqueo_cupo_id > reservas.bloqueo_cupo.id
+Ref: reservas.bloqueo_servicio.programacion_servicio_id > reservas.programacion_servicio.id
+Ref: reservas.reserva.bloqueo_cupo_id - reservas.bloqueo_cupo.id
+Ref: reservas.participante_reserva.reserva_id > reservas.reserva.id
+Ref: reservas.detalle_reserva.reserva_id > reservas.reserva.id
+Ref: reservas.detalle_participante.detalle_reserva_id > reservas.detalle_reserva.id
+Ref: reservas.detalle_participante.participante_reserva_id > reservas.participante_reserva.id
+Ref: reservas.calificacion.reserva_id - reservas.reserva.id
+
+Table pagos.pago {
+  id uuid [pk]
+  reserva_id_externo uuid [not null, unique]
+  cliente_id_externo uuid [not null]
+  valor decimal(12,2) [not null]
+  estado pagos.estado_pago [not null]
+  creado_en timestamptz [not null]
+  actualizado_en timestamptz
+}
+
+Table pagos.intento_pago {
+  id uuid [pk]
+  pago_id uuid [not null]
+  referencia varchar(100) [not null, unique]
+  metodo_pago varchar(50) [not null]
+  estado pagos.estado_pago [not null]
+  respuesta_pasarela text
+  procesado_en timestamptz
+  creado_en timestamptz [not null]
+}
+
+Ref: pagos.intento_pago.pago_id > pagos.pago.id
+
+Table operacion.guia {
+  id uuid [pk]
+  usuario_id_externo uuid [not null, unique]
+  numero_registro varchar(50)
+  observaciones varchar(500)
+  activo boolean [not null, default: true]
+}
+
+Table operacion.conductor {
+  id uuid [pk]
+  usuario_id_externo uuid [not null, unique]
+  numero_licencia varchar(50) [not null, unique]
+  categoria_licencia varchar(20)
+  vencimiento_licencia date
+  activo boolean [not null, default: true]
+}
+
+Table operacion.vehiculo {
+  id uuid [pk]
+  placa varchar(10) [not null, unique]
+  tipo varchar(50) [not null]
+  capacidad int [not null]
+  marca varchar(80)
+  modelo varchar(80)
+  activo boolean [not null, default: true]
+}
+
+Table operacion.salida_operativa {
+  id uuid [pk]
+  salida_reservas_id uuid [not null, unique]
+  experiencia_nombre_snapshot varchar(150) [not null]
+  fecha_hora_inicio timestamptz [not null]
+  fecha_hora_fin timestamptz
+  estado varchar(40) [not null]
+}
+
+Table operacion.ejecucion_experiencia {
+  id uuid [pk]
+  salida_operativa_id uuid [not null, unique]
+  guia_id uuid [not null]
+  fecha_hora_inicio_real timestamptz
+  fecha_hora_fin_real timestamptz
+  estado operacion.estado_ejecucion [not null]
+  observaciones text
+}
+
+Table operacion.ejecucion_servicio {
+  id uuid [pk]
+  ejecucion_experiencia_id uuid [not null]
+  programacion_reservas_id_externo uuid [not null, unique]
+  conductor_id uuid
+  vehiculo_id uuid
+  fecha_hora_inicio_real timestamptz
+  fecha_hora_fin_real timestamptz
+  estado operacion.estado_ejecucion [not null]
+  observaciones text
+}
+
+Ref: operacion.ejecucion_experiencia.salida_operativa_id - operacion.salida_operativa.id
+Ref: operacion.ejecucion_experiencia.guia_id > operacion.guia.id
+Ref: operacion.ejecucion_servicio.ejecucion_experiencia_id > operacion.ejecucion_experiencia.id
+Ref: operacion.ejecucion_servicio.conductor_id > operacion.conductor.id
+Ref: operacion.ejecucion_servicio.vehiculo_id > operacion.vehiculo.id
+
+Table notificaciones.plantilla {
+  id uuid [pk]
+  codigo varchar(80) [not null, unique]
+  canal varchar(30) [not null]
+  asunto varchar(200)
+  contenido text [not null]
+  activa boolean [not null, default: true]
+}
+
+Table notificaciones.notificacion {
+  id uuid [pk]
+  evento_id uuid [not null, unique]
+  plantilla_id uuid
+  destinatario varchar(150) [not null]
+  canal varchar(30) [not null]
+  estado notificaciones.estado_notificacion [not null]
+  creado_en timestamptz [not null]
+  enviada_en timestamptz
+}
+
+Table notificaciones.intento_entrega {
+  id uuid [pk]
+  notificacion_id uuid [not null]
+  numero_intento int [not null]
+  resultado varchar(40) [not null]
+  detalle text
+  ejecutado_en timestamptz [not null]
+}
+
+Ref: notificaciones.notificacion.plantilla_id > notificaciones.plantilla.id
+Ref: notificaciones.intento_entrega.notificacion_id > notificaciones.notificacion.id
+
+Table consultas.experiencia_publica {
+  experiencia_id uuid [pk]
+  nombre varchar(150) [not null]
+  destino varchar(150) [not null]
+  descripcion_corta varchar(500)
+  imagen_principal_url varchar(500)
+  calificacion_promedio decimal(3,2)
+  cantidad_calificaciones int [not null, default: 0]
+  actualizada_en timestamptz [not null]
+}
+
+Table consultas.experiencia_publica_servicio {
+  id uuid [pk]
+  experiencia_id uuid [not null]
+  nombre varchar(150) [not null]
+  tipo varchar(40) [not null]
+}
+
+Table consultas.reserva_cliente_consulta {
+  reserva_id uuid [pk]
+  cliente_id uuid [not null]
+  codigo varchar(30) [not null]
+  experiencia_nombre varchar(150) [not null]
+  destino varchar(150) [not null]
+  estado varchar(40) [not null]
+  total decimal(12,2) [not null]
+  fecha_reserva timestamptz [not null]
+  actualizada_en timestamptz [not null]
+}
+
+Table consultas.reserva_cliente_servicio {
+  id uuid [pk]
+  reserva_id uuid [not null]
+  servicio_nombre varchar(150) [not null]
+  cantidad int [not null]
+  subtotal decimal(12,2) [not null]
+}
+
+Table consultas.panel_operador_salida {
+  salida_id uuid [pk]
+  experiencia_nombre varchar(150) [not null]
+  fecha_hora_inicio timestamptz [not null]
+  cupos_disponibles int [not null]
+  reservas_confirmadas int [not null]
+  estado varchar(40) [not null]
+  actualizada_en timestamptz [not null]
+}
+
+Ref: consultas.experiencia_publica_servicio.experiencia_id > consultas.experiencia_publica.experiencia_id
+Ref: consultas.reserva_cliente_servicio.reserva_id > consultas.reserva_cliente_consulta.reserva_id

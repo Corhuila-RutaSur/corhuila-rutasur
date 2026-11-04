@@ -1,0 +1,39 @@
+spring:
+  application:
+    name: rutasur-identidad
+  datasource:
+    url: ${IDENTIDAD_DB_URL:jdbc:postgresql://localhost:5433/rutasur_identidad_db}
+    username: ${IDENTIDAD_DB_USERNAME:postgres}
+    password: ${IDENTIDAD_DB_PASSWORD:postgres}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+    placeholders:
+      identidad_admin_documento: ${IDENTIDAD_ADMIN_DOCUMENTO:1000000000}
+      identidad_admin_correo: ${IDENTIDAD_ADMIN_CORREO:admin@rutasur.local}
+      identidad_admin_telefono: ${IDENTIDAD_ADMIN_TELEFONO:3000000000}
+  messages:
+    basename: message
+
+server:
+  port: ${IDENTIDAD_PORT:8091}
+
+rutasur:
+  seguridad:
+    jwt:
+      # Solo desarrollo local académico. En un entorno real se inyecta desde Secrets Manager.
+      secreto: ${IDENTIDAD_JWT_SECRET:rutasur-desarrollo-local-jwt-secreto-2026}
+      access-minutos: ${IDENTIDAD_JWT_ACCESS_MINUTOS:15}
+      refresh-dias: ${IDENTIDAD_JWT_REFRESH_DIAS:7}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+scalar:
+  enabled: true
+  url: /v3/api-docs

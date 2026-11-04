@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: rutasur-gateway
+
+server:
+  port: ${GATEWAY_PORT:8080}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+scalar:
+  enabled: true
+  url: /v3/api-docs
+
+app:
+  servicios:
+    identidad: ${IDENTIDAD_URL:http://localhost:8091}
+    catalogo: ${CATALOGO_URL:http://localhost:8092}
+    reservas: ${RESERVAS_URL:http://localhost:8093}
+    pagos: ${PAGOS_URL:http://localhost:8094}
+    operacion: ${OPERACION_URL:http://localhost:8095}
+    consultas: ${CONSULTAS_URL:http://localhost:8097}

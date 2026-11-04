@@ -6,7 +6,7 @@ RutaSur es una plataforma web para descubrir, configurar, reservar y operar expe
 
 ## Estado del proyecto
 
-El proyecto se encuentra en la fase de definición de la V1: modelo de datos, reglas de negocio, migraciones, arquitectura y configuraciones base ya están establecidos. Los módulos funcionales y sus endpoints se implementarán guiados por las especificaciones de `docs/specs/`.
+La V1 ejecutable está congelada en la etiqueta `v1`. El proyecto inicia la definición de la V2: microservicios, arquitectura hexagonal interna, CQRS selectivo y comunicación por eventos. La documentación vigente está en [`docs/`](docs/README.md); la evidencia histórica de la V1 se conserva en [`docs/v1/`](docs/v1/README.md).
 
 ## Problema que resuelve
 
@@ -45,7 +45,7 @@ Experiencia
                     └── Participantes, pagos, asistencia y ejecución
 ```
 
-Consulta el [modelo entidad–relación](docs/architecture/modelo-entidad-relacion-v1.md) y el [diccionario de datos](docs/database/modelo-de-datos-v1.md) para el detalle.
+Consulta el [modelo entidad–relación histórico](docs/v1/architecture/modelo-entidad-relacion-v1.md), el [diccionario V1](docs/v1/database/modelo-de-datos-v1.md) y el [modelo de datos V2](docs/architecture/modelo-datos-v2.md) para el detalle.
 
 ## Estructura del repositorio
 
@@ -54,78 +54,34 @@ apps/
   api/                 Backend Spring Boot
   web/                 Frontend Angular
 docs/
-  specs/               Fuente de verdad funcional y criterios de aceptación
-  architecture/        Arquitectura, diagramas y contratos
-  database/            Guía de PostgreSQL y migraciones
+  specs/               Fuente de verdad funcional V2 y criterios de aceptación
+  architecture/        Arquitectura objetivo y diagramas
+  database/            Modelos y estrategia de migraciones por servicio
+  api/                 Convenciones de contratos HTTP
+  events/              Contratos de eventos e integración asíncrona
+  standards/           Reglas transversales y definición de terminado
   adr/                 Decisiones arquitectónicas
+  v1/                  Evidencia histórica del MVP etiquetado como v1
 ```
 
 ## Documentación principal
 
 | Documento | Para qué sirve |
 | --- | --- |
-| [Especificaciones funcionales](docs/specs/README.md) | Define el comportamiento antes de implementar. |
-| [Reglas de negocio](docs/specs/009-reglas-de-negocio.md) | Reglas transversales del dominio. |
-| [Autenticación y sesiones](docs/specs/011-autenticacion-y-sesiones.md) | Acceso público, JWT, refresh tokens y revocación. |
-| [Gestión de usuarios](docs/specs/013-gestion-de-usuarios.md) | Registro, perfil, validación de datos e inactivación lógica. |
-| [Modelo de datos](docs/database/modelo-de-datos-v1.md) | Propósito de cada tabla y regla de persistencia. |
-| [Modelo entidad–relación](docs/architecture/modelo-entidad-relacion-v1.md) | Relaciones principales entre entidades. |
-| [Migraciones](docs/database/README.md) | Creación de base, versionado y orden de Flyway. |
-| [Documentación de API](docs/architecture/documentacion-api.md) | Swagger UI, Scalar y OpenAPI JSON. |
-| [Estándar backend Spring](docs/standards/backend-spring.md) | DTOs, MapStruct, contratos OpenAPI, complejidad, errores, proyecciones y persistencia. |
-| [Estándar de pruebas](docs/standards/pruebas.md) | JUnit 5, ArchUnit, pruebas web, integración y calidad. |
-| [Estándar frontend Angular](docs/standards/frontend-angular.md) | UI reutilizable, formularios, validadores, estilos, servicios, guards y pruebas. |
-| [Componentes reutilizables del frontend](docs/architecture/componentes-reutilizables-frontend.md) | Catalogo, validacion y reglas de uso de la interfaz. |
-| [Decisiones de arquitectura](docs/adr/README.md) | ADRs vigentes del proyecto. |
+| [Índice de documentación](docs/README.md) | Punto de entrada para la V1 histórica y la V2 vigente. |
+| [ADR de migración V2](docs/adr/002-migracion-a-microservicios-v2.md) | Decisión de microservicios, hexagonal, CQRS y eventos. |
+| [Ejecución local V2](docs/operations/ejecucion-local-v2.md) | Guía reproducible: bases, Floci, colas, variables y orden de inicio. |
+| [Modelo de datos V2](docs/architecture/modelo-datos-v2.md) | Propiedad de datos, dominios y proyecciones CQRS. |
+| [Flujo de reserva V2](docs/architecture/flujo-creacion-reserva-v2.md) | Bloqueo temporal, pago, confirmación y liberación de cupos. |
+| [Documentación histórica V1](docs/v1/README.md) | Especificaciones, diagramas, estándares y modelo de datos preservados. |
 
 La documentación fuente y versionada se mantiene en `docs/`. La [Wiki publicada](https://github.com/Corhuila-RutaSur/corhuila-rutasur/wiki) replica las páginas de consulta general y debe sincronizarse cuando cambie información funcional o técnica.
 
-## Inicio rápido local
+## Inicio local V2
 
-### Requisitos
+La V2 requiere preparar PostgreSQL local, Floci y los recursos SNS/SQS antes de levantar los microservicios. Sigue la [guía de ejecución local V2](docs/operations/ejecucion-local-v2.md) en el orden indicado; contiene comandos reproducibles, variables, puertos, verificación y diagnóstico.
 
-- Java 25.
-- Node.js y npm compatibles con Angular 22.
-- PostgreSQL en ejecución.
-
-### Base de datos
-
-Crear una única vez la base `rutasur` siguiendo [la guía de base de datos](docs/database/README.md). Flyway aplicará automáticamente las migraciones al iniciar el backend.
-
-Variables locales esperadas:
-
-```text
-DB_URL=jdbc:postgresql://localhost:5433/rutasur
-DB_USERNAME=postgres
-DB_PASSWORD=tu_contrasena
-CORS_ALLOWED_ORIGINS=http://localhost:4200
-JWT_SECRET=secreto_base64_de_al_menos_32_bytes
-```
-
-### Backend
-
-```powershell
-cd apps/api
-.\mvnw.cmd spring-boot:run
-```
-
-```text
-API:         http://localhost:8090
-Swagger UI:  http://localhost:8090/swagger-ui/index.html
-Scalar:      http://localhost:8090/scalar
-OpenAPI:     http://localhost:8090/v3/api-docs
-Health:      http://localhost:8090/actuator/health
-```
-
-### Frontend
-
-```powershell
-cd apps/web
-npm install
-npm start
-```
-
-La aplicación web se sirve normalmente en `http://localhost:4200`.
+La V1 se puede consultar desde la etiqueta `v1` y su documentación histórica; no debe iniciarse como si fuera parte de la V2.
 
 ## Contrato de respuestas y autenticación
 
@@ -133,10 +89,10 @@ Todas las respuestas de la API usan `RespuestaGeneral<T>`: `codigoHttp`, `codigo
 
 ## Reglas de contribución y documentación
 
-1. Antes de implementar, consulta o crea la especificación correspondiente en `docs/specs/`.
+1. Antes de modificar V1, consulta su especificación histórica en `docs/v1/specs/`. Para V2, crea o actualiza el spec, contrato y documentación vigente en `docs/` dentro del mismo cambio.
 2. Todo cambio de comportamiento, flujo, estado, permiso, contrato HTTP, modelo de datos o configuración relevante debe actualizar la documentación afectada en el mismo cambio.
 3. Cuando el cambio altere la visión general, arquitectura, arranque local, enlaces, estado del proyecto o forma de usarlo, también se debe actualizar este `README.md`.
 4. Una migración Flyway aplicada no se modifica: se crea una nueva versión.
 5. No se incluyen secretos, contraseñas ni tokens reales en el repositorio o en la documentación.
 
-La norma verificable completa está en [012 — Gobierno de la documentación](docs/specs/012-gobierno-documentacion.md).
+La norma histórica está en [012 — Gobierno de la documentación](docs/v1/specs/012-gobierno-documentacion.md); la evolución V2 se rige por el [ADR-002](docs/adr/002-migracion-a-microservicios-v2.md).

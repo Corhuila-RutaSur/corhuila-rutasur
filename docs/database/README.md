@@ -1,27 +1,34 @@
-# Base de datos y migraciones
+# Persistencia y migraciones V2
 
-## Creacion inicial
+Cada microservicio posee una carpeta Flyway propia bajo `apps/api/<servicio>/src/main/resources/db/migration`. La primera migración ya existe para Identidad, Catálogo, Reservas, Pagos, Operación, Notificaciones y Consultas; cada una crea exclusivamente objetos de su base correspondiente.
 
-Flyway ejecuta migraciones *dentro* de una base de datos a la que la aplicacion ya puede conectarse. Por ello, la base `rutasur` se crea una sola vez con PostgreSQL o pgAdmin; el script de apoyo esta en `crear-base-rutasur.sql`.
+## Regla de propiedad
 
-Luego se configura la aplicacion mediante variables de entorno:
+Cada microservicio tendrá una base de datos PostgreSQL, un usuario técnico y una ruta de migraciones Flyway propios. En desarrollo local pueden coexistir en la misma instancia de PostgreSQL, pero no comparten esquema, tablas ni historial Flyway.
 
-```text
-DB_URL=jdbc:postgresql://localhost:5432/rutasur
-DB_USERNAME=postgres
-DB_PASSWORD=tu_contrasena
-```
+RutaSur usa el PostgreSQL instalado localmente por el equipo. Docker se reserva para Floci; no se levanta un contenedor PostgreSQL alterno. El script de creación única de bases está en `apps/api/infra/postgres/crear-bases-v2-locales.sql`.
 
-## Versionado
+| Servicio | Base de datos propuesta | Fuente de verdad |
+| --- | --- | --- |
+| Identidad | `rutasur_identidad_db` | Usuarios, roles y sesiones. |
+| Catálogo | `rutasur_catalogo_db` | Experiencias y servicios comerciales. |
+| Reservas | `rutasur_reservas_db` | Cupos, bloqueos y reservas. |
+| Pagos | `rutasur_pagos_db` | Pagos e intentos. |
+| Operación | `rutasur_operacion_db` | Recursos y ejecución. |
+| Notificaciones | `rutasur_notificaciones_db` | Entregas e intentos. |
+| Consultas | `rutasur_consultas_db` | Proyecciones CQRS. |
 
-| Archivo | Proposito |
-| --- | --- |
-| `V1__create_initial_schema.sql` | Crea tipos, tablas, restricciones, indices y reglas de integridad del modelo V1. |
-| `V2__seed_initial_catalogs.sql` | Carga roles y tipos de experiencia iniciales. |
-| `V3__create_authentication_schema.sql` | Crea sesiones, refresh tokens de uso único, revocación de access tokens y auditoría. |
+## Convenciones Flyway
 
-Las migraciones viven en `apps/api/src/main/resources/db/migration/`. Una migracion que ya fue aplicada en un ambiente compartido no debe editarse: un cambio posterior se incorpora en una nueva version, por ejemplo `V3__add_x.sql`.
+- Una migración aplicada nunca se edita; se agrega una nueva versión.
+- La ruta de cada servicio seguirá `src/main/resources/db/migration` dentro de su propio proyecto.
+- Las migraciones usan el patrón `V<numero>__<descripcion_en_snake_case>.sql`.
+- Cada tabla, columna, índice, restricción y dato semilla relevante debe incluir documentación PostgreSQL mediante `COMMENT ON`.
+- Las tablas que publican eventos incluyen `outbox_evento`; las que consumen eventos persistentes incluyen `inbox_evento`.
+- Los UUID externos no son llaves foráneas entre bases. Se nombran con el sufijo `_externo` o con un nombre explícito que indique su procedencia.
 
-Todas las tablas y columnas de las migraciones incluyen comentarios PostgreSQL (`COMMENT ON`). Estos se pueden consultar desde pgAdmin y otras herramientas para entender el propósito de cada elemento sin salir de la base de datos.
+## Modelo de referencia
 
-Consulta el [diccionario de datos V1](modelo-de-datos-v1.md) para la explicación funcional de cada tabla, sus reglas y las versiones iniciales de migración.
+El diseño lógico completo está en [modelo-v2.dbml](modelo-v2.dbml). Debe actualizarse junto con la migración que afecte el modelo. La explicación visual y las decisiones de propiedad están en el [modelo de datos V2](../architecture/modelo-datos-v2.md).
+
+> La base única `rutasur` y sus migraciones pertenecen a la evidencia histórica de [V1](../v1/database/README.md). No se modificarán durante la migración V2.

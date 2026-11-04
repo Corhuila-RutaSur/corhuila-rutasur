@@ -1,0 +1,33 @@
+spring:
+  application:
+    name: rutasur-consultas
+  datasource:
+    url: ${CONSULTAS_DB_URL:jdbc:postgresql://localhost:5433/rutasur_consultas_db}
+    username: ${CONSULTAS_DB_USERNAME:postgres}
+    password: ${CONSULTAS_DB_PASSWORD:postgres}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+
+server:
+  port: ${CONSULTAS_PORT:8097}
+
+app:
+  mensajeria:
+    endpoint: ${AWS_ENDPOINT_URL:http://localhost:4566}
+    region: ${AWS_REGION:us-east-1}
+    cola-catalogo: ${CONSULTAS_CATALOGO_QUEUE_URL:http://localhost:4566/000000000000/consultas-catalogo}
+    cola-reservas: ${CONSULTAS_RESERVAS_QUEUE_URL:http://localhost:4566/000000000000/consultas-reserva}
+    intervalo-consumo-ms: ${MENSAJERIA_INTERVALO_CONSUMO_MS:1000}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+scalar:
+  enabled: true
+  url: /v3/api-docs

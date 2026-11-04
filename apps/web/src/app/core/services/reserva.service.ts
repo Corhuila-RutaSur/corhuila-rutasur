@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { URL_API } from '../config/api.config';
+import { API_V2 } from '../config/api.config';
 import { Reserva, ReservaCreacionSolicitud, ReservaCreada } from '../models/reserva.model';
 import { RespuestaGeneral } from '../models/respuesta-general.model';
 
@@ -9,22 +9,22 @@ import { RespuestaGeneral } from '../models/respuesta-general.model';
 @Injectable({ providedIn: 'root' })
 export class ReservaService {
   private readonly http = inject(HttpClient);
-  private readonly url = inject(URL_API);
+  private readonly api = inject(API_V2);
 
   /** Registra una reserva con sus participantes y servicios seleccionados. */
   crear(solicitud: ReservaCreacionSolicitud): Observable<RespuestaGeneral<ReservaCreada>> {
-    return this.http.post<RespuestaGeneral<ReservaCreada>>(`${this.url}/reservas`, solicitud);
+    return this.http.post<RespuestaGeneral<ReservaCreada>>(`${this.api.reservas}/reservas`, solicitud);
   }
 
   /** Consulta el historial de reservas del usuario autenticado. */
-  listarPorUsuario(usuarioId: number): Observable<RespuestaGeneral<Reserva[]>> {
-    return this.http.get<RespuestaGeneral<Reserva[]>>(`${this.url}/usuarios/${usuarioId}/reservas`);
+  listarPorUsuario(usuarioId: string): Observable<RespuestaGeneral<Reserva[]>> {
+    return this.http.get<RespuestaGeneral<Reserva[]>>(`${this.api.reservas}/reservas/usuarios/${usuarioId}`);
   }
 
   /** Cancela una reserva pendiente sin borrar su historial. */
-  cancelar(reservaId: number): Observable<RespuestaGeneral<void>> {
-    return this.http.delete<RespuestaGeneral<void>>(`${this.url}/reservas/${reservaId}`);
+  cancelar(reservaId: string, usuarioId: string): Observable<RespuestaGeneral<ReservaCreada>> {
+    return this.http.delete<RespuestaGeneral<ReservaCreada>>(`${this.api.reservas}/reservas/${reservaId}`, { headers: { 'X-Usuario-Id': usuarioId } });
   }
 
-  pagarSimulado(reservaId: number): Observable<RespuestaGeneral<unknown>> { return this.http.post<RespuestaGeneral<unknown>>(`${this.url}/reservas/${reservaId}/pagos/simulado`, { metodoPago: 'TARJETA_SIMULADA' }); }
+  pagarSimulado(reservaId: string, monto: number): Observable<RespuestaGeneral<unknown>> { return this.http.post<RespuestaGeneral<unknown>>(`${this.api.pagos}/pagos`, { reservaIdExterna: reservaId, monto, resultado: 'APROBADO' }, { headers: { 'X-Correlation-Id': crypto.randomUUID() } }); }
 }

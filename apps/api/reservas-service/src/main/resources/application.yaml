@@ -1,0 +1,37 @@
+spring:
+  application:
+    name: rutasur-reservas
+  datasource:
+    url: ${RESERVAS_DB_URL:jdbc:postgresql://localhost:5433/rutasur_reservas_db}
+    username: ${RESERVAS_DB_USERNAME:postgres}
+    password: ${RESERVAS_DB_PASSWORD:postgres}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+  messages:
+    basename: message
+
+server:
+  port: ${RESERVAS_PORT:8093}
+
+app:
+  mensajeria:
+    endpoint: ${AWS_ENDPOINT_URL:http://localhost:4566}
+    region: ${AWS_REGION:us-east-1}
+    topico-reservas: ${RESERVAS_TOPIC_ARN:arn:aws:sns:us-east-1:000000000000:reservas.reserva}
+    cola-pagos: ${RESERVAS_PAGOS_QUEUE_URL:http://localhost:4566/000000000000/reservas-pago}
+    cola-catalogo: ${RESERVAS_CATALOGO_QUEUE_URL:http://localhost:4566/000000000000/reservas-catalogo}
+    intervalo-publicacion-ms: ${MENSAJERIA_INTERVALO_PUBLICACION_MS:2000}
+    intervalo-consumo-ms: ${MENSAJERIA_INTERVALO_CONSUMO_MS:1000}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+scalar:
+  enabled: true
+  url: /v3/api-docs
